@@ -1,0 +1,23 @@
+{
+	"type"              : "lib",
+	"template"          : "clean",
+	"pm"                : "bun",
+	"repo": {
+		"org"           : "cruxkit",
+		"name"          : "navbar",
+		"version"       : "0.0.1",
+		"desc"          : "Tiny, composable navbar engine for CruxJS ad MineJS. Arrange responsive nav sections with simple, typed config only.",
+		"kw"            : ["crux", "kit", "navbar"],
+		"license"       : "MIT",
+		"issues"        : "https://github.com/cruxkit-org/navbar/issues",
+		"homepage"      : "https://github.com/cruxkit-org/navbar#readme",
+		"git_url"       : "git+https://github.com/cruxkit-org/navbar.git"
+	},
+	"author": {
+		"id"            : "maysara-elshewehy",
+		"name"          : "Maysara",
+		"email"         : "maysara.elshewehy@gmail.com",
+		"url"           : "https://github.com/maysara-elshewehy"
+	},
+	"createdAt"         : "2026-01-17T02:59:08.239Z"
+}
