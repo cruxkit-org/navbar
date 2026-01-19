@@ -8,10 +8,10 @@
 </div>
 
 <div align="center">
-    <img src="https://img.shields.io/badge/v-0.0.2-black"/>
+    <img src="https://img.shields.io/badge/v-0.0.3-black"/>
     <a href="https://github.com/cruxkit-org"><img src="https://img.shields.io/badge/🔥-@cruxkit-black"/></a>
     <br>
-    <img src="https://img.shields.io/badge/coverage-100%25-brightgreen" alt="Test Coverage" />
+    <img src="https://img.shields.io/badge/coverage-99.58%25-brightgreen" alt="Test Coverage" />
     <img src="https://img.shields.io/github/issues/cruxkit-org/navbar?style=flat" alt="Github Repo Issues" />
     <img src="https://img.shields.io/github/stars/cruxkit-org/navbar?style=social" alt="GitHub Repo stars" />
 </div>
@@ -127,25 +127,14 @@
         - #### Functions
 
             ```tsx
-            /**
-             * Renders a responsive navigation bar with support for multiple layouts and item positioning.
-            *
-            * @param props             - Configuration for the navbar.
-            * @param props.items       - Array of navigation items to render, each with a designated position (`start`, `center`, or `end`).
-            * @param props.mode        - Layout mode; either `horizontal` (default) or `vertical`.
-            * @param props.gap         - Spacing size between items; accepts `sm`, `md` (default), or `lg`.
-            * @param props.sticky      - Whether the navbar should stick to the top of the viewport when scrolling.
-            * @param props.className   - Additional CSS classes to apply to the navbar root element.
-            * 
-            * @returns A JSX element representing the fully composed navbar.
-            */
+            // Renders a responsive navigation bar with support for multiple layouts and item positioning.
             export function Navbar(props: NavProps): JSXElement
             ```
 
         - #### Types
 
             ```tsx
-            export type NavItemPosition     = 'start'       | 'center'      | 'end';
+            export type NavItemPosition     = 'start'       | 'center'      | 'center-start' | 'center-end' | 'end';
             export type NavItemAlign        = 'flex-start'  | 'center'      | 'flex-end';
             export type NavLayoutMode       = 'horizontal'  | 'vertical';
             export type NavSpacing          = 'sm'          | 'md'          | 'lg';
@@ -158,12 +147,21 @@
                 | 'divider'
                 | 'custom';
 
+            export type NavItemPositionMap = Partial<Record<NavItemType, NavItemPosition>>;
+
+            export type NavDividerOnMobile = 'hidden' | 'visible' | 'horizontal' | 'vertical';
+
+            export type NavItemContent = JSXElement | JSXElement[] | (() => JSXElement | JSXElement[]);
+
             export interface NavItem {
                 type                        : NavItemType;
-                content?                    : JSXElement | JSXElement[];
-                position                    : NavItemPosition;
+                content?                    : NavItemContent;
+                position?                   : NavItemPosition;
                 align?                      : NavItemAlign;
                 responsive?                 : Partial<Record<'mobile' | 'tablet' | 'desktop', NavItemPosition>>;
+                keepOnMobile?               : boolean;
+                divider?                    : boolean;
+                dividerOnMobile?            : NavDividerOnMobile;
             }
 
             export interface NavProps {
@@ -171,7 +169,18 @@
                 mode?                       : NavLayoutMode;
                 gap?                        : NavSpacing;
                 sticky?                     : boolean;
+                positionMap?                : NavItemPositionMap;
                 className?                  : string;
+                autoDividerBetweenItems?    : boolean;
+                dividerOnMobile?            : NavDividerOnMobile;
+                
+                // Divider customization
+                dividerVariant?             : 'solid' | 'dashed' | 'dotted';
+                dividerThickness?           : 'super-thin' | 'thin' | 'medium' | 'thick';
+                dividerColor?               : '1' | '2' | '3' | 'brand' | 'current';
+                dividerSpacing?             : 0 | 1 | 2 | 3 | 4 | 6 | 8 | 12;
+                dividerOpacity?             : 0 | 5 | 10 | 20 | 40 | 50 | 60 | 25 | 30 | 70 | 75 | 80 | 90 | 95 | 100;
+                dividerMax?                 : number;
             }
             ```
 
@@ -184,15 +193,7 @@
 
         - ##### [@mineui/utils](https://github.com/mineui-org/utils)
 
-        - ##### [@cruxkit/text](https://github.com/cruxkit-org/text)
-
-        - ##### [@cruxkit/icon](https://github.com/cruxkit-org/icon)
-
         - ##### [@cruxkit/container](https://github.com/cruxkit-org/container)
-
-        - ##### [@cruxkit/button](https://github.com/cruxkit-org/button)
-        
-        - ##### [@cruxkit/dropdown](https://github.com/cruxkit-org/dropdown)
 
         - ##### [@cruxkit/..](https://github.com/cruxkit-org)
 

@@ -37,6 +37,7 @@
                 {
                     type: 'logo',
                     position: 'start',
+                    keepOnMobile: true,
                 },
                 {
                     type: 'links',
@@ -47,6 +48,7 @@
                     type: 'actions',
                     position: 'center',
                     align: 'center',
+                    keepOnMobile: true,
                 },
                 {
                     type: 'search',
@@ -76,6 +78,7 @@
                 {
                     type: 'logo',
                     position: 'start',
+                    keepOnMobile: true,
                 },
                 {
                     type: 'actions',
@@ -128,6 +131,123 @@
             });
 
             expect(result).toBeTruthy();
+        });
+
+        test('supports positionMap configuration', () => {
+            const items: NavItem[] = [
+                {
+                    type: 'logo',
+                    position: 'start',
+                    keepOnMobile: true,
+                },
+                {
+                    type: 'actions',
+                    position: 'end',
+                },
+            ];
+
+            const result = Navbar({
+                items,
+                positionMap: {
+                    actions: 'end',
+                },
+            });
+
+            expect(result).toBeTruthy();
+        });
+
+        test('renders center-start and center-end sections', () => {
+            const items: NavItem[] = [
+                { type: 'links', position: 'center-start' },
+                { type: 'actions', position: 'center-end' },
+            ];
+            const result = Navbar({ items });
+            expect(result).toBeTruthy();
+        });
+
+        test('handles function content and custom dividers', () => {
+            const items: NavItem[] = [
+                { 
+                    type: 'custom', 
+                    // @ts-ignore
+                    content: () => ({ type: 'div', children: 'dynamic' }) 
+                },
+                { 
+                    type: 'divider', 
+                    // @ts-ignore
+                    content: ({ type: 'span', children: 'custom divider' }) 
+                },
+            ];
+            const result = Navbar({ items });
+            expect(result).toBeTruthy();
+        });
+
+        test('handles complex divider configurations', () => {
+            const items: NavItem[] = [
+                { type: 'links', divider: true },
+                { type: 'actions', divider: false },
+                { type: 'custom' },
+                { type: 'search' }
+            ];
+            
+            // Test autoDivider
+            Navbar({ items, autoDividerBetweenItems: true });
+            
+            // Test dividerOnMobile variations using divider: true on items
+            // The renderDivider helper is used for dividers *between* items
+            const mobileDividerItems: NavItem[] = [
+                { type: 'custom', divider: true, dividerOnMobile: 'hidden', position: 'start' },
+                { type: 'custom', divider: true, dividerOnMobile: 'visible', position: 'start' },
+                { type: 'custom', divider: true, dividerOnMobile: 'horizontal', position: 'start' },
+                { type: 'custom', divider: true, dividerOnMobile: 'vertical', position: 'start' },
+                { type: 'custom', position: 'start' } // Last item to ensure dividers are rendered before it
+            ];
+
+            Navbar({ items: mobileDividerItems, mode: 'horizontal' });
+            Navbar({ items: mobileDividerItems, mode: 'vertical' });
+        });
+
+        test('handles mobile toggle interactions', () => {
+            const items: NavItem[] = [
+                { type: 'links', position: 'end' } // Must be in 'end' to trigger toggle container
+            ];
+            
+            const result = Navbar({ items }) as unknown as HTMLElement;
+            
+            // Find mobile toggle label
+            const toggle = result.querySelector('label[for="navbar-mobile-toggle"]') as HTMLElement;
+            if (toggle) {
+                // Simulate Enter key
+                const enterEvent = new (global.window as any).KeyboardEvent('keydown', {
+                    key: 'Enter',
+                    bubbles: true,
+                    cancelable: true,
+                });
+                toggle.dispatchEvent(enterEvent);
+
+                // Simulate Space key
+                const spaceEvent = new (global.window as any).KeyboardEvent('keydown', {
+                    key: ' ',
+                    bubbles: true,
+                    cancelable: true,
+                });
+                toggle.dispatchEvent(spaceEvent);
+            } else {
+                throw new Error('Mobile toggle not found');
+            }
+
+            // Find close button in drawer
+            const closeBtn = result.querySelector('.navbar-mobile-drawer label[role="button"]') as HTMLElement;
+            if (closeBtn) {
+                 const enterEvent = new (global.window as any).KeyboardEvent('keydown', {
+                    key: 'Enter',
+                    bubbles: true,
+                    cancelable: true,
+                });
+                closeBtn.dispatchEvent(enterEvent);
+            } else {
+                throw new Error('Close button not found');
+            }
         });
     });
 
