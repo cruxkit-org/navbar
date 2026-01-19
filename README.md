@@ -8,7 +8,7 @@
 </div>
 
 <div align="center">
-    <img src="https://img.shields.io/badge/v-0.0.3-black"/>
+    <img src="https://img.shields.io/badge/v-0.0.4-black"/>
     <a href="https://github.com/cruxkit-org"><img src="https://img.shields.io/badge/🔥-@cruxkit-black"/></a>
     <br>
     <img src="https://img.shields.io/badge/coverage-99.58%25-brightgreen" alt="Test Coverage" />
@@ -44,7 +44,7 @@
 
     ```ts
     // in your ts files
-    import { Dropdown } from `@cruxkit/navbar`;
+    import { Navbar } from `@cruxkit/navbar`;
     ```
 
     <div align="center"> <img src="./assets/img/line.png" alt="line" style="display: block; margin-top:20px;margin-bottom:20px;width:500px;"/> </div>
@@ -54,28 +54,33 @@
     - ### Basic usage
 
         ```tsx
-        import { Navbar } from '@cruxkit/navbar';
+        import { Navbar, type NavItem } from '@cruxkit/navbar';
 
-        export function AppNavbar() {
-            return (
-                <Navbar
-                    items={[
-                        {
-                            type: 'logo',
-                            position: 'start',
-                        },
-                        {
-                            type: 'links',
-                            position: 'center',
-                        },
-                        {
-                            type: 'actions',
-                            position: 'end',
-                        },
-                    ]}
-                />
-            );
-        }
+        const items: NavItem[] = [
+            {
+                type: 'logo',
+                content: <img src="/logo.svg" alt="Logo" />,
+                position: 'start'
+            },
+            {
+                type: 'links',
+                position: 'center',
+                content: (
+                    <>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/about">About</a></li>
+                        <li><a href="/contact">Contact</a></li>
+                    </>
+                )
+            },
+            {
+                type: 'actions',
+                position: 'end',
+                content: <button>Login</button>
+            }
+        ];
+
+        export const MyNavbar = () => <Navbar items={items} />;
         ```
 
     - ### With options
@@ -86,34 +91,44 @@
         const items: NavItem[] = [
             {
                 type: 'logo',
-                position: 'start',
+                content: <span>CruxKit</span>,
+                keepOnMobile: true
             },
             {
                 type: 'links',
-                position: 'center',
-                align: 'center',
+                content: (
+                    <>
+                        <li>Features</li>
+                        <li>Pricing</li>
+                    </>
+                )
+            },
+            {
+                type: 'search',
+                content: <input placeholder="Search..." />
             },
             {
                 type: 'actions',
-                position: 'end',
-                responsive: {
-                    mobile: 'center',
-                    desktop: 'end',
-                },
-            },
+                content: <button>Sign Up</button>
+            }
         ];
 
-        export function AppNavbar() {
-            return (
-                <Navbar
-                    items={items}
-                    mode="horizontal"
-                    gap="sm"
-                    sticky
-                    className="border-b"
-                />
-            );
-        }
+        export const AppNavbar = () => (
+            <Navbar 
+                items={items}
+                sticky={true}
+                gap="lg"
+                autoDividerBetweenItems={true}
+                dividerOnMobile="hidden"
+                className="shadow-sm"
+                positionMap={{
+                    logo: 'start',
+                    links: 'center',
+                    search: 'end',
+                    actions: 'end'
+                }}
+            />
+        );
         ```
 
     <br>
