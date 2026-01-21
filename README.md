@@ -8,10 +8,10 @@
 </div>
 
 <div align="center">
-    <img src="https://img.shields.io/badge/v-0.0.4-black"/>
+    <img src="https://img.shields.io/badge/v-0.0.5-black"/>
     <a href="https://github.com/cruxkit-org"><img src="https://img.shields.io/badge/🔥-@cruxkit-black"/></a>
     <br>
-    <img src="https://img.shields.io/badge/coverage-99.58%25-brightgreen" alt="Test Coverage" />
+    <img src="https://img.shields.io/badge/coverage-94.35%25-brightgreen" alt="Test Coverage" />
     <img src="https://img.shields.io/github/issues/cruxkit-org/navbar?style=flat" alt="Github Repo Issues" />
     <img src="https://img.shields.io/github/stars/cruxkit-org/navbar?style=social" alt="GitHub Repo stars" />
 </div>
@@ -119,7 +119,7 @@
                 sticky={true}
                 gap="lg"
                 autoDividerBetweenItems={true}
-                dividerOnMobile="hidden"
+                dividerMainOnMobile="hidden"
                 className="shadow-sm"
                 positionMap={{
                     logo: 'start',
@@ -176,7 +176,7 @@
                 responsive?                 : Partial<Record<'mobile' | 'tablet' | 'desktop', NavItemPosition>>;
                 keepOnMobile?               : boolean;
                 divider?                    : boolean;
-                dividerOnMobile?            : NavDividerOnMobile;
+                dividerMainOnMobile?        : NavDividerOnMobile;
             }
 
             export interface NavProps {
@@ -187,7 +187,7 @@
                 positionMap?                : NavItemPositionMap;
                 className?                  : string;
                 autoDividerBetweenItems?    : boolean;
-                dividerOnMobile?            : NavDividerOnMobile;
+                dividerMainOnMobile?        : NavDividerOnMobile;
                 
                 // Divider customization
                 dividerVariant?             : 'solid' | 'dashed' | 'dotted';
@@ -196,6 +196,14 @@
                 dividerSpacing?             : 0 | 1 | 2 | 3 | 4 | 6 | 8 | 12;
                 dividerOpacity?             : 0 | 5 | 10 | 20 | 40 | 50 | 60 | 25 | 30 | 70 | 75 | 80 | 90 | 95 | 100;
                 dividerMax?                 : number;
+
+                // Sidebar Divider customization
+                sidebarDividerVariant?      : 'solid' | 'dashed' | 'dotted';
+                sidebarDividerThickness?    : 'super-thin' | 'thin' | 'medium' | 'thick';
+                sidebarDividerColor?        : '1' | '2' | '3' | 'brand' | 'current';
+                sidebarDividerSpacing?      : 0 | 1 | 2 | 3 | 4 | 6 | 8 | 12;
+                sidebarDividerOpacity?      : 0 | 5 | 10 | 20 | 40 | 50 | 60 | 25 | 30 | 70 | 75 | 80 | 90 | 95 | 100;
+                sidebarDividerMax?          : number;
             }
             ```
 

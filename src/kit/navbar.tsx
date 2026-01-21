@@ -7,10 +7,11 @@
 // ╔════════════════════════════════════════ PACK ════════════════════════════════════════╗
 
     import type { JSXElement } from '@minejs/jsx';
-    import { Container, type ContainerGap } from '@cruxkit/container';
+    import { Container, type ContainerGap, type ContainerJustify } from '@cruxkit/container';
     import { Icon } from '@cruxkit/icon';
     import { Divider } from '@cruxkit/divider';
     import type { NavProps, NavItem, NavSpacing, NavItemAlign } from '../types';
+import { push } from '@cruxjs/client';
 
 // ╚══════════════════════════════════════════════════════════════════════════════════════╝
 
@@ -24,16 +25,32 @@
         return 4;
     }
 
-    function getAlignClass(align?: NavItemAlign): string {
-        if (align === 'flex-start') return 'justify-start';
-        if (align === 'center') return 'justify-center';
-        if (align === 'flex-end') return 'justify-end';
-        return '';
+    function resolveItemGap(gap?: NavSpacing | ContainerGap): ContainerGap | undefined {
+        if (gap === undefined) return undefined;
+        if (typeof gap === 'number') return gap;
+        return resolveNavGap(gap);
     }
 
-    function resolveContent(content: NavItem['content']): JSXElement | JSXElement[] | undefined {
+    function resolveJustify(align?: NavItemAlign): ContainerJustify | undefined {
+        if (align === 'flex-start') return 'start';
+        if (align === 'center') return 'center';
+        if (align === 'flex-end') return 'end';
+        return undefined;
+    }
+
+    function resolveContent(content: NavItem['content'], clone?: boolean): JSXElement | JSXElement[] | undefined {
         if (!content) return undefined;
         if (typeof content === 'function') return content();
+        
+        if (clone) {
+            if (content instanceof Node) {
+                return content.cloneNode(true) as JSXElement;
+            }
+            if (Array.isArray(content)) {
+                return content.map(c => (c instanceof Node ? c.cloneNode(true) : c)) as JSXElement[];
+            }
+        }
+        
         return content;
     }
 
@@ -43,16 +60,20 @@
         return 'hidden md:flex';
     }
 
-    function renderNavItem(item: NavItem, navProps?: NavProps): JSXElement {
+    function renderNavItem(item: NavItem, navProps?: NavProps, clone?: boolean): JSXElement {
+        const itemConfig = navProps?.config?.[item.type];
+        const gap = resolveItemGap(itemConfig?.gap);
+
         if (item.type === 'logo') {
             return (
                 <Container
                     display="flex"
                     align="center"
-                    gap={2}
-                    className="navbar-item navbar-logo"
+                    gap={gap ?? 2}
+                    className="navbar-item navbar-logo cursor-pointer"
+                    onClick={() => push('/')}
                 >
-                    {resolveContent(item.content)}
+                    {resolveContent(item.content, clone)}
                 </Container>
             );
         }
@@ -63,10 +84,11 @@
                     as="ul"
                     display="flex"
                     align="center"
-                    gap={1}
+                    gap={gap ?? 1}
+                    h="full"
                     className="navbar-item navbar-links"
                 >
-                    {resolveContent(item.content)}
+                    {resolveContent(item.content, clone)}
                 </Container>
             );
         }
@@ -76,10 +98,11 @@
                 <Container
                     display="flex"
                     align="center"
-                    gap={2}
+                    gap={gap ?? 2}
+                    h="full"
                     className="navbar-item navbar-actions"
                 >
-                    {resolveContent(item.content)}
+                    {resolveContent(item.content, clone)}
                 </Container>
             );
         }
@@ -89,25 +112,28 @@
                 <Container
                     display="flex"
                     align="center"
-                    gap={2}
+                    gap={gap ?? 2}
+                    h="full"
                     className="navbar-item navbar-search"
                 >
-                    {resolveContent(item.content)}
+                    {resolveContent(item.content, clone)}
                 </Container>
             );
         }
 
         if (item.type === 'divider') {
-            const resolved = resolveContent(item.content);
+            const resolved = resolveContent(item.content, clone);
             
             // If user provided content (custom divider), use it wrapped in container
             if (resolved) {
                 return (
                     <Container
+                        display="flex"
+                        align="center"
                         w="auto"
                         h="full"
                         px={2}
-                        className="navbar-item navbar-divider flex items-center"
+                        className="navbar-item navbar-divider"
                     >
                         {resolved}
                     </Container>
@@ -118,10 +144,12 @@
             // Note: In most navbar cases (horizontal), we want a vertical divider.
             return (
                 <Container
+                    display="flex"
+                    align="center"
                     w="auto"
                     h="full"
                     px={2}
-                    className="navbar-item navbar-divider flex items-center"
+                    className="navbar-item navbar-divider"
                 >
                     <Divider
                         orientation="vertical"
@@ -140,9 +168,10 @@
             <Container
                 display="flex"
                 align="center"
+                h="full"
                 className="navbar-item navbar-custom"
             >
-                {resolveContent(item.content)}
+                {resolveContent(item.content, clone)}
             </Container>
         );
     }
@@ -154,11 +183,6 @@
         autoDivider?: boolean
     ): boolean {
         if (item.type === 'divider') return false;
-        const isLast = index === items.length - 1;
-        
-        // Don't show divider after last item
-        if (isLast) return false;
-
         if (item.divider === true) return true;
         if (item.divider === false) return false;
         return !!autoDivider;
@@ -169,7 +193,7 @@
         const gap = props.gap || 'md';
 
         const renderDivider = (item: NavItem, defaultOrientation: 'horizontal' | 'vertical') => {
-            const mobileOption = item.dividerOnMobile || props.dividerOnMobile;
+            const mobileOption = item.dividerMainOnMobile || props.dividerMainOnMobile;
 
             // Common props for Divider
             const dividerProps = {
@@ -195,7 +219,9 @@
             if (mobileOption === 'hidden') {
                 return (
                     <Container
-                        className={`hidden md:block ${defaultOrientation === 'vertical' ? 'h-full' : 'w-full'}`}
+                        h={defaultOrientation === 'vertical' ? 'full' : undefined}
+                        w={defaultOrientation === 'vertical' ? undefined : 'full'}
+                        className="hidden md:flex items-center"
                     >
                         <Divider
                             orientation={defaultOrientation}
@@ -221,13 +247,13 @@
                     // Mobile: Horizontal, Desktop: Vertical
                     return (
                         <>
-                            <Container className="md:hidden w-full">
+                            <Container w="full" className="md:hidden flex items-center">
                                 <Divider
                                     orientation="horizontal"
                                     {...dividerProps}
                                 />
                             </Container>
-                            <Container className="hidden md:block h-full">
+                            <Container h="full" className="hidden md:flex items-center">
                                 <Divider
                                     orientation="vertical"
                                     {...dividerProps}
@@ -251,13 +277,13 @@
                     // Mobile: Vertical, Desktop: Horizontal
                     return (
                         <>
-                            <Container className="md:hidden h-full">
+                            <Container h="full" className="flex md:hidden items-center">
                                 <Divider
                                     orientation="vertical"
                                     {...dividerProps}
                                 />
                             </Container>
-                            <Container className="hidden md:block w-full">
+                            <Container w="full" className="hidden md:flex items-center">
                                 <Divider
                                     orientation="horizontal"
                                     {...dividerProps}
@@ -279,7 +305,9 @@
         };
 
         const itemsWithPosition = props.items.map(item => {
-            const position = item.position || props.positionMap?.[item.type] || 'start';
+            const position = item.position
+                || props.config?.[item.type]?.position
+                || 'start';
             return { item, position };
         });
 
@@ -294,6 +322,17 @@
         const collapsedItems = props.items.filter(
             item => item.type !== 'logo' && !item.keepOnMobile
         );
+
+        const mobileActionsPosition = props.mobileActionsPosition || 'top';
+        const mobileItemsLayout = props.mobileItemsLayout || 'vertical';
+
+        const mobileTopItems = mobileActionsPosition === 'bottom'
+            ? collapsedItems.filter(item => item.type !== 'actions')
+            : collapsedItems;
+
+        const mobileBottomItems = mobileActionsPosition === 'bottom'
+            ? collapsedItems.filter(item => item.type === 'actions')
+            : [];
 
         const hasCollapsedItems = collapsedItems.length > 0;
 
@@ -318,7 +357,6 @@
                 display="flex"
                 direction={modeClasses.direction}
                 gap={gapValue}
-                w="full"
                 bg="surface"
                 className={`
                     navbar
@@ -334,6 +372,7 @@
                         direction={modeClasses.sectionDirection}
                         gap={gapValue}
                         align="center"
+                        h="full"
                         className="navbar-section navbar-section--start"
                     >
                         {itemsByPosition.start.map((item, index, arr) => (
@@ -341,13 +380,10 @@
                                 <Container
                                     display="flex"
                                     align="center"
+                                    justify={item.type !== 'divider' ? resolveJustify(item.align) : undefined}
+                                    h="full"
                                     className={`
                                         navbar-item-wrapper
-                                        ${
-                                            item.type !== 'divider'
-                                                ? getAlignClass(item.align)
-                                                : ''
-                                        }
                                         ${getMobileVisibilityClass(item)}
                                     `}
                                 >
@@ -357,12 +393,12 @@
                                     item,
                                     index,
                                     arr,
-                                    props.autoDividerBetweenItems
                                 ) && (
                                     <Container
                                         display="flex"
                                         align="center"
-                                        className={mode === 'horizontal' ? 'h-full' : 'w-full'}
+                                        h={mode === 'horizontal' ? 'full' : undefined}
+                                        w={mode === 'horizontal' ? undefined : 'full'}
                                     >
                                         {renderDivider(item, mode === 'horizontal' ? 'vertical' : 'horizontal')}
                                     </Container>
@@ -378,23 +414,28 @@
                         direction={modeClasses.sectionDirection}
                         gap={gapValue}
                         align="center"
-                        className="navbar-section navbar-section--center flex-1 justify-between"
+                        justify="between"
+                        h="full"
+                        className="navbar-section navbar-section--center flex-1"
                     >
                          {/* Center Start Section */}
                          {itemsByPosition.centerStart.length > 0 && (
-                            <Container className="flex items-center justify-start flex-1">
+                            <Container
+                                display="flex"
+                                align="center"
+                                justify="start"
+                                h="full"
+                                className="flex-1"
+                            >
                                 {itemsByPosition.centerStart.map((item, index, arr) => (
                                     <>
                                         <Container
                                             display="flex"
                                             align="center"
+                                            justify={item.type !== 'divider' ? resolveJustify(item.align) : undefined}
+                                            h="full"
                                             className={`
                                                 navbar-item-wrapper
-                                                ${
-                                                    item.type !== 'divider'
-                                                        ? getAlignClass(item.align)
-                                                        : ''
-                                                }
                                                 ${getMobileVisibilityClass(item)}
                                             `}
                                         >
@@ -404,12 +445,12 @@
                                             item,
                                             index,
                                             arr,
-                                            props.autoDividerBetweenItems
                                         ) && (
                                             <Container
                                                 display="flex"
                                                 align="center"
-                                                className={mode === 'horizontal' ? 'h-full' : 'w-full'}
+                                                h={mode === 'horizontal' ? 'full' : undefined}
+                                                w={mode === 'horizontal' ? undefined : 'full'}
                                             >
                                                 {renderDivider(item, mode === 'horizontal' ? 'vertical' : 'horizontal')}
                                             </Container>
@@ -421,19 +462,22 @@
 
                          {/* Center Section */}
                          {itemsByPosition.center.length > 0 && (
-                            <Container className="flex items-center justify-center flex-0">
+                            <Container
+                                display="flex"
+                                align="center"
+                                justify="center"
+                                h="full"
+                                className="flex-0"
+                            >
                                 {itemsByPosition.center.map((item, index, arr) => (
                                     <>
                                         <Container
                                             display="flex"
                                             align="center"
+                                            justify={item.type !== 'divider' ? resolveJustify(item.align) : undefined}
+                                            h="full"
                                             className={`
                                                 navbar-item-wrapper
-                                                ${
-                                                    item.type !== 'divider'
-                                                        ? getAlignClass(item.align)
-                                                        : ''
-                                                }
                                                 ${getMobileVisibilityClass(item)}
                                             `}
                                         >
@@ -443,12 +487,12 @@
                                             item,
                                             index,
                                             arr,
-                                            props.autoDividerBetweenItems
                                         ) && (
                                             <Container
                                                 display="flex"
                                                 align="center"
-                                                className={mode === 'horizontal' ? 'h-full' : 'w-full'}
+                                                h={mode === 'horizontal' ? 'full' : undefined}
+                                                w={mode === 'horizontal' ? undefined : 'full'}
                                             >
                                                 {renderDivider(item, mode === 'horizontal' ? 'vertical' : 'horizontal')}
                                             </Container>
@@ -460,19 +504,22 @@
 
                          {/* Center End Section */}
                          {itemsByPosition.centerEnd.length > 0 && (
-                            <Container className="flex items-center justify-end flex-1">
+                            <Container
+                                display="flex"
+                                align="center"
+                                justify="end"
+                                h="full"
+                                className="flex-1"
+                            >
                                 {itemsByPosition.centerEnd.map((item, index, arr) => (
                                     <>
                                         <Container
                                             display="flex"
                                             align="center"
+                                            justify={item.type !== 'divider' ? resolveJustify(item.align) : undefined}
+                                            h="full"
                                             className={`
                                                 navbar-item-wrapper
-                                                ${
-                                                    item.type !== 'divider'
-                                                        ? getAlignClass(item.align)
-                                                        : ''
-                                                }
                                                 ${getMobileVisibilityClass(item)}
                                             `}
                                         >
@@ -482,7 +529,6 @@
                                             item,
                                             index,
                                             arr,
-                                            props.autoDividerBetweenItems
                                         ) && (
                                             <Container
                                                 display="flex"
@@ -505,6 +551,7 @@
                         direction={modeClasses.sectionDirection}
                         gap={gapValue}
                         align="center"
+                        h="full"
                         className="navbar-section navbar-section--end justify-end"
                     >
                         {itemsByPosition.end.map((item, index, arr) => (
@@ -512,13 +559,10 @@
                                 <Container
                                     display="flex"
                                     align="center"
+                                    justify={item.type !== 'divider' ? resolveJustify(item.align) : undefined}
+                                    h="full"
                                     className={`
                                         navbar-item-wrapper
-                                        ${
-                                            item.type !== 'divider'
-                                                ? getAlignClass(item.align)
-                                                : ''
-                                        }
                                         ${getMobileVisibilityClass(item)}
                                     `}
                                 >
@@ -528,7 +572,6 @@
                                     item,
                                     index,
                                     arr,
-                                    props.autoDividerBetweenItems
                                 ) && (
                                     <Container
                                         display="flex"
@@ -633,7 +676,7 @@
                                         display="flex"
                                         direction="column"
                                         gap={gapValue}
-                                        className="p-4"
+                                        className="p-4 flex-1 overflow-y-auto"
                                     >
                                         <Container
                                             display="flex"
@@ -671,16 +714,86 @@
                                             </label>
                                         </Container>
 
-                                        {collapsedItems.map(item => (
-                                            <Container
-                                                display="flex"
-                                                align="center"
-                                                className="navbar-item-wrapper"
-                                            >
-                                                {renderNavItem(item, props)}
-                                            </Container>
-                                        ))}
+                                        <Container
+                                            display="flex"
+                                            direction="column"
+                                            gap={gapValue}
+                                            w="full"
+                                        >
+                                            {mobileTopItems.map((item, index, arr) => (
+                                                <>
+                                                    <Container
+                                                        display="flex"
+                                                        align="center"
+                                                        justify="center"
+                                                        w="full"
+                                                        className="navbar-item-wrapper"
+                                                    >
+                                                        {renderNavItem(item, props, true)}
+                                                    </Container>
+                                                    {shouldShowDividerAfter(item, index, arr) && (
+                                                        <Container
+                                                            w="full"
+                                                        >
+                                                            <Divider
+                                                                orientation="horizontal"
+                                                                thickness={props.sidebarDividerThickness || props.dividerThickness || "super-thin"}
+                                                                spacing={props.sidebarDividerSpacing ?? props.dividerSpacing ?? 2}
+                                                                opacity={props.sidebarDividerOpacity ?? props.dividerOpacity ?? 50}
+                                                                variant={props.sidebarDividerVariant || props.dividerVariant}
+                                                                color={props.sidebarDividerColor || props.dividerColor}
+                                                                max={props.sidebarDividerMax ?? props.dividerMax ?? 60}
+                                                            />
+                                                        </Container>
+                                                    )}
+                                                </>
+                                            ))}
+                                        </Container>
                                     </Container>
+
+                                    {mobileBottomItems.length > 0 && (
+                                        <Container
+                                            display="flex"
+                                            direction={mobileItemsLayout === 'horizontal' ? 'row' : 'column'}
+                                            wrap={mobileItemsLayout === 'horizontal' ? true : undefined}
+                                            gap={gapValue}
+                                            align={mobileItemsLayout === 'horizontal' ? 'center' : undefined}
+                                            justify={mobileItemsLayout === 'horizontal' ? 'center' : undefined}
+                                            w="full"
+                                            className="p-4 border-t border-1"
+                                        >
+                                            {mobileBottomItems.map((item, index, arr) => (
+                                                <>
+                                                    <Container
+                                                        display="flex"
+                                                        align="center"
+                                                        justify="center"
+                                                        w={mobileItemsLayout === 'horizontal' ? undefined : 'full'}
+                                                        className="navbar-item-wrapper"
+                                                    >
+                                                        {renderNavItem(item, props, true)}
+                                                    </Container>
+                                                    {shouldShowDividerAfter(item, index, arr) && (
+                                                        <Container
+                                                            w={mobileItemsLayout === 'horizontal' ? undefined : 'full'}
+                                                            h={mobileItemsLayout === 'horizontal' ? 'full' : undefined}
+                                                            px={mobileItemsLayout === 'horizontal' ? 2 : undefined}
+                                                        >
+                                                            <Divider
+                                                                orientation={mobileItemsLayout === 'horizontal' ? 'vertical' : 'horizontal'}
+                                                                thickness={props.sidebarDividerThickness || props.dividerThickness || "super-thin"}
+                                                                spacing={props.sidebarDividerSpacing ?? props.dividerSpacing ?? 2}
+                                                                opacity={props.sidebarDividerOpacity ?? props.dividerOpacity ?? 50}
+                                                                variant={props.sidebarDividerVariant || props.dividerVariant}
+                                                                color={props.sidebarDividerColor || props.dividerColor}
+                                                                max={props.sidebarDividerMax ?? props.dividerMax ?? 60}
+                                                            />
+                                                        </Container>
+                                                    )}
+                                                </>
+                                            ))}
+                                        </Container>
+                                    )}
                                 </Container>
                             </Container>
                         )}
