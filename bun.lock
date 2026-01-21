@@ -4,10 +4,10 @@
     "": {
       "name": "@cruxkit/icon",
       "dependencies": {
-        "@cruxjs/client": "^0.2.2",
+        "@cruxjs/client": "^0.2.6",
         "@cruxkit/container": "0.0.5",
         "@cruxkit/divider": "^0.0.3",
-        "@cruxkit/icon": "^0.0.6",
+        "@cruxkit/icon": "^0.0.7",
         "@minejs/jsx": "^0.1.4",
       },
       "devDependencies": {
@@ -39,9 +39,9 @@
 
     "@asamuzakjp/nwsapi": ["@asamuzakjp/nwsapi@2.3.9", "", {}, "sha512-n8GuYSrI9bF7FFZ/SjhwevlHc8xaVlb/7HmHelnc/PZXBD2ZR49NnN9sMMuDdEGPeeRQ5d0hqlSlEpgCX3Wl0Q=="],
 
-    "@cruxjs/base": ["@cruxjs/base@0.1.8", "", { "dependencies": { "@minejs/logger": "^0.0.2" }, "peerDependencies": { "bun": "^1.3.3" } }, "sha512-qzbJYTRC6uMeDew5X5ViEZag7AJZBE3Ts1lesWcBUc+UrjMkNZoWRJ5/2HXMBSPJ8s67SocdqjpGK6cWtadhZA=="],
+    "@cruxjs/base": ["@cruxjs/base@0.1.9", "", { "dependencies": { "@minejs/logger": "^0.0.2" }, "peerDependencies": { "bun": "^1.3.3" } }, "sha512-MJ6MhPxqCzInWaKB+tBNKbLr3Aoq7G4iBaJHnkZf1GLFk8HYG2KnvrDj3jN4jvpvhdmGioGIuEp52FkA2RaO5Q=="],
 
-    "@cruxjs/client": ["@cruxjs/client@0.2.2", "", { "dependencies": { "@cruxjs/base": "^0.1.8", "@cruxkit/core": "^0.0.2", "@minejs/browser": "^0.0.4", "@minejs/i18n": "^0.1.4", "@minejs/jsx": "^0.1.2", "@minejs/signals": "^0.0.6", "@minejs/store": "^0.0.3" }, "peerDependencies": { "bun": "^1.3.3" } }, "sha512-ipqd3dIOLRmzTBrMuUvIJKQYfWQ5byXEauCZbUsM4fPpqr4bsWm+78QlHKwNC2lakdb+7RMMCIhH2KS5wq6vOA=="],
+    "@cruxjs/client": ["@cruxjs/client@0.2.6", "", { "dependencies": { "@cruxjs/base": "^0.1.9", "@cruxkit/core": "^0.0.2", "@minejs/browser": "^0.0.4", "@minejs/i18n": "^0.1.7", "@minejs/jsx": "^0.1.4", "@minejs/signals": "^0.0.6", "@minejs/store": "^0.0.3" }, "peerDependencies": { "bun": "^1.3.3" } }, "sha512-ZuUD67tknzMWKlFB4eZXiCGBsqH8aX8pFL6ChY750VfAmqvNvTDKur4LS18lMjxhxqgsmB7QnUOtSLHk28kQew=="],
 
     "@cruxkit/container": ["@cruxkit/container@0.0.5", "", { "dependencies": { "@minejs/jsx": "^0.1.3" }, "peerDependencies": { "bun": "^1.3.3" } }, "sha512-nHiDrDsAbQFJMvugo5d/4TPFOHzOkkPBXgLK9wDGVFolXm5n+MxOfxOVi/Ps3eDND/j5+iamLN9559Mfylbj0g=="],
 
@@ -49,7 +49,7 @@
 
     "@cruxkit/divider": ["@cruxkit/divider@0.0.3", "", { "dependencies": { "@minejs/jsx": "^0.1.3" }, "peerDependencies": { "bun": "^1.3.3" } }, "sha512-Exk/0OLWielZMQ9rHkgU4036MrV1US33yjTGRJLz+59jvdqM0kSuj1m4agqNcSdhfabrRn8LLchrS9Pjk3SrtQ=="],
 
-    "@cruxkit/icon": ["@cruxkit/icon@0.0.6", "", { "dependencies": { "@minejs/jsx": "^0.1.4" }, "peerDependencies": { "bun": "^1.3.3" } }, "sha512-FVPQZxmoXNafjc+LAWNqXZ4f7QAX5AvoG42rnaczkwDJhZpW0+HoKYKZ0oObVd0Yz74CyqEEwC8NY/YCZDlsKA=="],
+    "@cruxkit/icon": ["@cruxkit/icon@0.0.7", "", { "dependencies": { "@minejs/jsx": "^0.1.4" }, "peerDependencies": { "bun": "^1.3.3" } }, "sha512-Xnymn/31OEH3IMRPyqyjcuQlsTAzwz5wNktdgoMK3BRzy2oocWLkFALmHsgRpKVBahBL/USK2FWBLDbwyQApSw=="],
 
     "@cspotcode/source-map-support": ["@cspotcode/source-map-support@0.8.1", "", { "dependencies": { "@jridgewell/trace-mapping": "0.3.9" } }, "sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw=="],
 
@@ -155,7 +155,7 @@
 
     "@minejs/browser": ["@minejs/browser@0.0.4", "", { "dependencies": { "@minejs/signals": "^0.0.6" }, "peerDependencies": { "bun": "^1.3.3" } }, "sha512-1/QmEjw1+5Y3zyOXIO2hicCRqJUJSaIrdqrfe8ibnviFmX9+GICN0dc7hmGDxQNoWzcDNENOCgAxQq6iLi3uzA=="],
 
-    "@minejs/i18n": ["@minejs/i18n@0.1.4", "", { "peerDependencies": { "bun": "^1.3.3" } }, "sha512-67+zujUMXbmhTLRZhnCXp2PXUK5ZxlbU2uzd4WWbnuhqYT3eaN3azz2yrI9QlqdgQnzcJzCjXpfOVCbaDEQxtw=="],
+    "@minejs/i18n": ["@minejs/i18n@0.1.7", "", { "peerDependencies": { "bun": "^1.3.3" } }, "sha512-mCPwOJBatXZtRIPyKAQqcMApkac8DMW54fQ+l+/vLjsoyxuUtCjGdownVYuGgcg8VYxLBq9FP7ayUAJ+CQWiAw=="],
 
     "@minejs/jsx": ["@minejs/jsx@0.1.4", "", { "dependencies": { "@minejs/signals": "^0.0.6" }, "peerDependencies": { "bun": "^1.3.3" } }, "sha512-Zsx9f3eduaMEBJVDB7FDRHI9sGd7GYCwjwYoH97cXZNUympcrnWXqRdMaIqNHwNaFq1b7bxmvowTG+etncEYoQ=="],
 
@@ -618,8 +618,6 @@
     "yn": ["yn@3.1.1", "", {}, "sha512-Ux4ygGWsu2c7isFWe8Yu1YluJmqVhxqK2cLXNQA5AcC3QfbGNpM7fu0Y8b/z16pXLnFxZYvWhd3fhBY9DLmC6Q=="],
 
     "yocto-queue": ["yocto-queue@0.1.0", "", {}, "sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q=="],
-
-    "@cruxjs/client/@minejs/jsx": ["@minejs/jsx@0.1.3", "", { "dependencies": { "@minejs/signals": "^0.0.6", "@minejsx/render": "^0.0.3", "@minejsx/runtime": "^0.0.3" }, "peerDependencies": { "bun": "^1.3.3" } }, "sha512-hZsnFfJu5SKwEQynJF1PHupJs/1Xz1dvQxeWEmmmWWwp8mT0kn7ppwJffC5qpRfZvah7qcka6NyljxqeWoe5EA=="],
 
     "@cruxkit/container/@minejs/jsx": ["@minejs/jsx@0.1.3", "", { "dependencies": { "@minejs/signals": "^0.0.6", "@minejsx/render": "^0.0.3", "@minejsx/runtime": "^0.0.3" }, "peerDependencies": { "bun": "^1.3.3" } }, "sha512-hZsnFfJu5SKwEQynJF1PHupJs/1Xz1dvQxeWEmmmWWwp8mT0kn7ppwJffC5qpRfZvah7qcka6NyljxqeWoe5EA=="],
 

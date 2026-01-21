@@ -188,6 +188,13 @@
         return !!autoDivider;
     }
 
+    function getDrawerTranslateClass(): string {
+        if (typeof document === 'undefined') return 'translate-x-full';
+        const dir = document.documentElement.getAttribute('dir');
+        if (dir === 'rtl') return '-translate-x-full';
+        return 'translate-x-full';
+    }
+
     export function Navbar(props: NavProps): JSXElement {
         const mode = props.mode || 'horizontal';
         const gap = props.gap || 'md';
@@ -651,7 +658,7 @@
                                 <Container
                                     display="flex"
                                     direction="column"
-                                    className="
+                                    className={`
                                         navbar-mobile-drawer
                                         fixed
                                         inset-y-0
@@ -664,12 +671,12 @@
                                         border-1
                                         shadow-lg
                                         md:hidden
-                                        translate-x-full
+                                        ${getDrawerTranslateClass()}
                                         transition-transform
                                         duration-300
                                         ease-out
                                         peer-checked:translate-x-0
-                                    "
+                                    `}
                                 >
                                     <Container
                                         display="flex"
