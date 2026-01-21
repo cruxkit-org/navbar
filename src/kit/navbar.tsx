@@ -11,7 +11,7 @@
     import { Icon } from '@cruxkit/icon';
     import { Divider } from '@cruxkit/divider';
     import type { NavProps, NavItem, NavSpacing, NavItemAlign } from '../types';
-import { push } from '@cruxjs/client';
+    import { push } from '@cruxjs/client';
 
 // ╚══════════════════════════════════════════════════════════════════════════════════════╝
 
@@ -628,8 +628,7 @@ import { push } from '@cruxjs/client';
                                     }}
                                 >
                                     <Icon
-                                        svg="<path d='M4 7h16v2H4z'/><path d='M4 11h16v2H4z'/><path d='M4 15h16v2H4z'/>"
-                                        viewBox="0 0 24 24"
+                                        name='bars'
                                         size="md"
                                     />
                                 </label>
@@ -707,8 +706,7 @@ import { push } from '@cruxjs/client';
                                                 }}
                                             >
                                                 <Icon
-                                                    svg="<path d='M6 6l12 12M6 18L18 6' stroke='currentColor' stroke-width='2' stroke-linecap='round'/>"
-                                                    viewBox="0 0 24 24"
+                                                    name='x'
                                                     size="md"
                                                 />
                                             </label>
