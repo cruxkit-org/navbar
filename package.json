@@ -1,6 +1,6 @@
 {
 	"name"                             : "@cruxkit/navbar",
-	"version"                          : "0.1.4",
+	"version"                          : "0.1.5",
 	"description"                      : "Tiny, composable navbar engine for CruxJS ad MineJS. Arrange responsive nav sections with simple, typed config only.",
 	"keywords"                         : ["crux", "kit", "navbar"],
 	"license"                          : "MIT",
@@ -40,12 +40,12 @@
 		"bun"                          : "^1.3.3"
 	},
 	"dependencies": {
-		"@cruxjs/client"               : "^0.3.5",
-		"@cruxkit/container"           : "^0.0.9",
-		"@cruxkit/divider"             : "^0.0.6",
-		"@cruxkit/icon"                : "^0.1.0",
-		"@cruxkit/overlay"             : "^0.0.8",
-		"@minejs/jsx"                  : "^0.1.7"
+		"@cruxjs/client"               : "^0.3.6",
+		"@cruxkit/container"           : "^0.1.0",
+		"@cruxkit/divider"             : "^0.0.7",
+		"@cruxkit/icon"                : "^0.1.1",
+		"@cruxkit/overlay"             : "^0.0.9",
+		"@minejs/jsx"                  : "^0.1.8"
 	},
 	"devDependencies": {
 		"@eslint/js"                   : "^9.39.2",
