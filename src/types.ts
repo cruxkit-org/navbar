@@ -84,8 +84,8 @@
         toggleIcon?                 : string;
         toggleClassName?            : string;
         showToggle?                 : boolean;
+        alwaysShowToggle?           : boolean;
     }
-
 
     // ─────────────────────────────── NAVBAR PROPS ────────────────────────────────
 

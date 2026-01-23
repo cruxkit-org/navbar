@@ -514,7 +514,7 @@
                                 <Container
                                     display="flex"
                                     align="center"
-                                    className={`navbar-sidemenu-toggle ms-4 md:hidden ${props.sidemenu!.toggleClassName || ''}`}
+                                    className={`navbar-sidemenu-toggle ms-4 ${props.sidemenu!.alwaysShowToggle ? '' : 'md:hidden'} ${props.sidemenu!.toggleClassName || ''}`}
                                 >
                                     <label
                                         htmlFor={props.sidemenu!.id}

@@ -41,6 +41,7 @@ interface SidemenuConfig {
     toggleIcon?: string;
     toggleClassName?: string;
     showToggle?: boolean;
+    alwaysShowToggle?: boolean;
 }
 interface NavProps {
     items: NavItem[];
