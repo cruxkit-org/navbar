@@ -174,49 +174,6 @@
             expect(result).toBeTruthy();
         });
 
-        test('handles mobile toggle interactions', () => {
-            const items: NavItem[] = [
-                { type: 'links', position: 'end' } // Must be in 'end' to trigger toggle container
-            ];
-            
-            const result = Navbar({ items }) as unknown as HTMLElement;
-            
-            // Find mobile toggle label
-            const toggle = result.querySelector('label[for="navbar-mobile-toggle"]') as HTMLElement;
-            if (toggle) {
-                // Simulate Enter key
-                const enterEvent = new (global.window as any).KeyboardEvent('keydown', {
-                    key: 'Enter',
-                    bubbles: true,
-                    cancelable: true,
-                });
-                toggle.dispatchEvent(enterEvent);
-
-                // Simulate Space key
-                const spaceEvent = new (global.window as any).KeyboardEvent('keydown', {
-                    key: ' ',
-                    bubbles: true,
-                    cancelable: true,
-                });
-                toggle.dispatchEvent(spaceEvent);
-            } else {
-                throw new Error('Mobile toggle not found');
-            }
-
-            // Find close button in drawer
-            const closeBtn = result.querySelector('.navbar-mobile-drawer label[role="button"]') as HTMLElement;
-            if (closeBtn) {
-                 const enterEvent = new (global.window as any).KeyboardEvent('keydown', {
-                    key: 'Enter',
-                    bubbles: true,
-                    cancelable: true,
-                });
-                closeBtn.dispatchEvent(enterEvent);
-            } else {
-                throw new Error('Close button not found');
-            }
-        });
-
         test('applies gap from config to links container', () => {
             const items: NavItem[] = [
                 {
@@ -273,20 +230,6 @@
             expect(navbar).toBeTruthy();
         });
 
-        test('supports mobile drawer configuration', () => {
-            const items: NavItem[] = [
-                { type: 'links', position: 'start' },
-                { type: 'actions', position: 'end' }
-            ];
-
-            const result = Navbar({
-                items,
-                mobileActionsPosition: 'bottom',
-                mobileItemsLayout: 'horizontal'
-            });
-
-            expect(result).toBeTruthy();
-        });
     });
 
 // ╚══════════════════════════════════════════════════════════════════════════════════════╝

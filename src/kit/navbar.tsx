@@ -8,9 +8,10 @@
 
     import type { JSXElement } from '@minejs/jsx';
     import { Container, type ContainerGap, type ContainerJustify } from '@cruxkit/container';
-    import { Icon } from '@cruxkit/icon';
+    import { Icon, IconName } from '@cruxkit/icon';
     import { Divider } from '@cruxkit/divider';
     import type { NavProps, NavItem, NavSpacing, NavItemAlign } from '../types';
+    import { Sidemenu } from './sidemenu';
     import { push } from '@cruxjs/client';
 
 // ╚══════════════════════════════════════════════════════════════════════════════════════╝
@@ -38,19 +39,9 @@
         return undefined;
     }
 
-    function resolveContent(content: NavItem['content'], clone?: boolean): JSXElement | JSXElement[] | undefined {
+    function resolveContent(content: NavItem['content']): JSXElement | JSXElement[] | undefined {
         if (!content) return undefined;
         if (typeof content === 'function') return content();
-        
-        if (clone) {
-            if (content instanceof Node) {
-                return content.cloneNode(true) as JSXElement;
-            }
-            if (Array.isArray(content)) {
-                return content.map(c => (c instanceof Node ? c.cloneNode(true) : c)) as JSXElement[];
-            }
-        }
-        
         return content;
     }
 
@@ -60,7 +51,7 @@
         return 'hidden md:flex';
     }
 
-    function renderNavItem(item: NavItem, navProps?: NavProps, clone?: boolean): JSXElement {
+    function renderNavItem(item: NavItem, navProps?: NavProps): JSXElement {
         const itemConfig = navProps?.config?.[item.type];
         const gap = resolveItemGap(itemConfig?.gap);
 
@@ -73,7 +64,7 @@
                     className="navbar-item navbar-logo cursor-pointer"
                     onClick={() => push('/')}
                 >
-                    {resolveContent(item.content, clone)}
+                    {resolveContent(item.content)}
                 </Container>
             );
         }
@@ -88,7 +79,7 @@
                     h="full"
                     className="navbar-item navbar-links"
                 >
-                    {resolveContent(item.content, clone)}
+                    {resolveContent(item.content)}
                 </Container>
             );
         }
@@ -102,7 +93,7 @@
                     h="full"
                     className="navbar-item navbar-actions"
                 >
-                    {resolveContent(item.content, clone)}
+                    {resolveContent(item.content)}
                 </Container>
             );
         }
@@ -116,15 +107,14 @@
                     h="full"
                     className="navbar-item navbar-search"
                 >
-                    {resolveContent(item.content, clone)}
+                    {resolveContent(item.content)}
                 </Container>
             );
         }
 
         if (item.type === 'divider') {
-            const resolved = resolveContent(item.content, clone);
+            const resolved = resolveContent(item.content);
             
-            // If user provided content (custom divider), use it wrapped in container
             if (resolved) {
                 return (
                     <Container
@@ -140,8 +130,6 @@
                 );
             }
 
-            // Otherwise, render a clean default Divider directly
-            // Note: In most navbar cases (horizontal), we want a vertical divider.
             return (
                 <Container
                     display="flex"
@@ -171,7 +159,7 @@
                 h="full"
                 className="navbar-item navbar-custom"
             >
-                {resolveContent(item.content, clone)}
+                {resolveContent(item.content)}
             </Container>
         );
     }
@@ -179,137 +167,117 @@
     function shouldShowDividerAfter(
         item: NavItem,
         index: number,
-        items: NavItem[],
-        autoDivider?: boolean
+        items: NavItem[]
     ): boolean {
         if (item.type === 'divider') return false;
         if (item.divider === true) return true;
         if (item.divider === false) return false;
-        return !!autoDivider;
+        return false;
     }
 
-    function getDrawerTranslateClass(): string {
-        if (typeof document === 'undefined') return 'translate-x-full';
-        const dir = document.documentElement.getAttribute('dir');
-        if (dir === 'rtl') return '-translate-x-full';
-        return 'translate-x-full';
+    function renderDivider(item: NavItem, navProps: NavProps, orientation: 'horizontal' | 'vertical') {
+        const mobileOption = item.dividerMainOnMobile;
+
+        const dividerProps = {
+            thickness: navProps.dividerThickness || "super-thin",
+            spacing: navProps.dividerSpacing ?? 2,
+            opacity: navProps.dividerOpacity ?? 50,
+            variant: navProps.dividerVariant,
+            color: navProps.dividerColor,
+            max: navProps.dividerMax ?? 60,
+        };
+
+        if (!mobileOption) {
+            return (
+                <Divider
+                    orientation={orientation}
+                    {...dividerProps}
+                />
+            );
+        }
+
+        if (mobileOption === 'hidden') {
+            return (
+                <Container
+                    h={orientation === 'vertical' ? 'full' : undefined}
+                    w={orientation === 'vertical' ? undefined : 'full'}
+                    className="hidden md:flex items-center"
+                >
+                    <Divider
+                        orientation={orientation}
+                        {...dividerProps}
+                    />
+                </Container>
+            );
+        }
+
+        if (mobileOption === 'visible') {
+            return (
+                <Divider
+                    orientation={orientation}
+                    {...dividerProps}
+                />
+            );
+        }
+
+        if (mobileOption === 'horizontal') {
+            if (orientation === 'vertical') {
+                return (
+                    <>
+                        <Container w="full" className="md:hidden flex items-center">
+                            <Divider orientation="horizontal" {...dividerProps} />
+                        </Container>
+                        <Container h="full" className="hidden md:flex items-center">
+                            <Divider orientation="vertical" {...dividerProps} />
+                        </Container>
+                    </>
+                );
+            }
+            return <Divider orientation="horizontal" {...dividerProps} />;
+        }
+
+        if (mobileOption === 'vertical') {
+            if (orientation === 'horizontal') {
+                return (
+                    <>
+                        <Container h="full" className="flex md:hidden items-center">
+                            <Divider orientation="vertical" {...dividerProps} />
+                        </Container>
+                        <Container w="full" className="hidden md:flex items-center">
+                            <Divider orientation="horizontal" {...dividerProps} />
+                        </Container>
+                    </>
+                );
+            }
+            return <Divider orientation="vertical" {...dividerProps} />;
+        }
+
+        return null;
     }
 
+    /**
+     * Renders a responsive navigation bar with configurable sections and items.
+     *
+     * @param {NavProps} props - The configuration object for the navbar.
+     * @param {NavItem[]} props.items - Array of navigation items to render.
+     * @param {'horizontal' | 'vertical'} [props.mode='horizontal'] - Layout direction of the navbar.
+     * @param {NavSpacing} [props.gap='md'] - Spacing between navbar sections.
+     * @param {boolean} [props.sticky] - Whether the navbar should stick to the top of the viewport.
+     * @param {string} [props.className] - Additional CSS classes to apply to the navbar.
+     * @param {NavConfig} [props.config] - Per-item-type configuration overrides.
+     * @param {string} [props.dividerThickness] - Thickness of divider lines.
+     * @param {number} [props.dividerSpacing] - Spacing around divider lines.
+     * @param {number} [props.dividerOpacity] - Opacity of divider lines.
+     * @param {string} [props.dividerVariant] - Visual variant of divider lines.
+     * @param {string} [props.dividerColor] - Color of divider lines.
+     * @param {number} [props.dividerMax] - Maximum length of divider lines.
+     * @param {SidemenuProps} [props.sidemenu] - Configuration for an optional sidemenu toggle.
+     * @returns {JSXElement} The rendered navbar component.
+     */
     export function Navbar(props: NavProps): JSXElement {
         const mode = props.mode || 'horizontal';
         const gap = props.gap || 'md';
-
-        const renderDivider = (item: NavItem, defaultOrientation: 'horizontal' | 'vertical') => {
-            const mobileOption = item.dividerMainOnMobile || props.dividerMainOnMobile;
-
-            // Common props for Divider
-            const dividerProps = {
-                thickness: props.dividerThickness || "super-thin",
-                spacing: props.dividerSpacing ?? 2,
-                opacity: props.dividerOpacity ?? 50,
-                variant: props.dividerVariant,
-                color: props.dividerColor,
-                max: props.dividerMax ?? 60,
-            };
-
-            // Default behavior (no option specified)
-            if (!mobileOption) {
-                return (
-                    <Divider
-                        orientation={defaultOrientation}
-                        {...dividerProps}
-                    />
-                );
-            }
-
-            // Hidden on mobile
-            if (mobileOption === 'hidden') {
-                return (
-                    <Container
-                        h={defaultOrientation === 'vertical' ? 'full' : undefined}
-                        w={defaultOrientation === 'vertical' ? undefined : 'full'}
-                        className="hidden md:flex items-center"
-                    >
-                        <Divider
-                            orientation={defaultOrientation}
-                            {...dividerProps}
-                        />
-                    </Container>
-                );
-            }
-
-            // Visible on mobile (standard behavior, but explicit)
-            if (mobileOption === 'visible') {
-                return (
-                    <Divider
-                        orientation={defaultOrientation}
-                        {...dividerProps}
-                    />
-                );
-            }
-
-            // Force horizontal on mobile
-            if (mobileOption === 'horizontal') {
-                if (defaultOrientation === 'vertical') {
-                    // Mobile: Horizontal, Desktop: Vertical
-                    return (
-                        <>
-                            <Container w="full" className="md:hidden flex items-center">
-                                <Divider
-                                    orientation="horizontal"
-                                    {...dividerProps}
-                                />
-                            </Container>
-                            <Container h="full" className="hidden md:flex items-center">
-                                <Divider
-                                    orientation="vertical"
-                                    {...dividerProps}
-                                />
-                            </Container>
-                        </>
-                    );
-                }
-                // Desktop is also horizontal
-                return (
-                    <Divider
-                        orientation="horizontal"
-                        {...dividerProps}
-                    />
-                );
-            }
-
-            // Force vertical on mobile
-            if (mobileOption === 'vertical') {
-                if (defaultOrientation === 'horizontal') {
-                    // Mobile: Vertical, Desktop: Horizontal
-                    return (
-                        <>
-                            <Container h="full" className="flex md:hidden items-center">
-                                <Divider
-                                    orientation="vertical"
-                                    {...dividerProps}
-                                />
-                            </Container>
-                            <Container w="full" className="hidden md:flex items-center">
-                                <Divider
-                                    orientation="horizontal"
-                                    {...dividerProps}
-                                />
-                            </Container>
-                        </>
-                    );
-                }
-                // Desktop is also vertical
-                return (
-                    <Divider
-                        orientation="vertical"
-                        {...dividerProps}
-                    />
-                );
-            }
-
-            return null;
-        };
+        const hasSidemenu = !!props.sidemenu;
 
         const itemsWithPosition = props.items.map(item => {
             const position = item.position
@@ -319,29 +287,12 @@
         });
 
         const itemsByPosition = {
-            start       : itemsWithPosition.filter(entry => entry.position === 'start').map(entry => entry.item),
-            centerStart : itemsWithPosition.filter(entry => entry.position === 'center-start').map(entry => entry.item),
-            center      : itemsWithPosition.filter(entry => entry.position === 'center').map(entry => entry.item),
-            centerEnd   : itemsWithPosition.filter(entry => entry.position === 'center-end').map(entry => entry.item),
-            end         : itemsWithPosition.filter(entry => entry.position === 'end').map(entry => entry.item)
+            start       : itemsWithPosition.filter(e => e.position === 'start').map(e => e.item),
+            centerStart : itemsWithPosition.filter(e => e.position === 'center-start').map(e => e.item),
+            center      : itemsWithPosition.filter(e => e.position === 'center').map(e => e.item),
+            centerEnd   : itemsWithPosition.filter(e => e.position === 'center-end').map(e => e.item),
+            end         : itemsWithPosition.filter(e => e.position === 'end').map(e => e.item)
         };
-
-        const collapsedItems = props.items.filter(
-            item => item.type !== 'logo' && !item.keepOnMobile
-        );
-
-        const mobileActionsPosition = props.mobileActionsPosition || 'top';
-        const mobileItemsLayout = props.mobileItemsLayout || 'vertical';
-
-        const mobileTopItems = mobileActionsPosition === 'bottom'
-            ? collapsedItems.filter(item => item.type !== 'actions')
-            : collapsedItems;
-
-        const mobileBottomItems = mobileActionsPosition === 'bottom'
-            ? collapsedItems.filter(item => item.type === 'actions')
-            : [];
-
-        const hasCollapsedItems = collapsedItems.length > 0;
 
         const gapValue = resolveNavGap(gap);
 
@@ -359,452 +310,254 @@
         const stickyClass = props.sticky ? 'sticky top-0 z-40' : '';
 
         return (
-            <Container
-                as="nav"
-                display="flex"
-                direction={modeClasses.direction}
-                gap={gapValue}
-                bg="surface"
-                className={`
-                    navbar
-                    ${mode === 'horizontal' ? 'border-b' : 'border-e'}
-                    border-1
-                    ${stickyClass}
-                    ${props.className || ''}
-                `}
-            >
-                {itemsByPosition.start.length > 0 && (
-                    <Container
-                        display="flex"
-                        direction={modeClasses.sectionDirection}
-                        gap={gapValue}
-                        align="center"
-                        h="full"
-                        className="navbar-section navbar-section--start"
-                    >
-                        {itemsByPosition.start.map((item, index, arr) => (
-                            <>
-                                <Container
-                                    display="flex"
-                                    align="center"
-                                    justify={item.type !== 'divider' ? resolveJustify(item.align) : undefined}
-                                    h="full"
-                                    className={`
-                                        navbar-item-wrapper
-                                        ${getMobileVisibilityClass(item)}
-                                    `}
-                                >
-                                    {renderNavItem(item, props)}
-                                </Container>
-                                {shouldShowDividerAfter(
-                                    item,
-                                    index,
-                                    arr,
-                                ) && (
+            <>
+                <Container
+                    as="nav"
+                    display="flex"
+                    direction={modeClasses.direction}
+                    gap={gapValue}
+                    bg="surface"
+                    className={`
+                        navbar
+                        ${mode === 'horizontal' ? 'border-b' : 'border-e'}
+                        border-1
+                        ${stickyClass}
+                        ${props.className || ''}
+                    `}
+                >
+                    {itemsByPosition.start.length > 0 && (
+                        <Container
+                            display="flex"
+                            direction={modeClasses.sectionDirection}
+                            gap={gapValue}
+                            align="center"
+                            h="full"
+                            className="navbar-section navbar-section--start"
+                        >
+                            {itemsByPosition.start.map((item, index, arr) => (
+                                <>
                                     <Container
                                         display="flex"
                                         align="center"
-                                        h={mode === 'horizontal' ? 'full' : undefined}
-                                        w={mode === 'horizontal' ? undefined : 'full'}
+                                        justify={item.type !== 'divider' ? resolveJustify(item.align) : undefined}
+                                        h="full"
+                                        className={`
+                                            navbar-item-wrapper
+                                            ${getMobileVisibilityClass(item)}
+                                        `}
                                     >
-                                        {renderDivider(item, mode === 'horizontal' ? 'vertical' : 'horizontal')}
+                                        {renderNavItem(item, props)}
                                     </Container>
-                                )}
-                            </>
-                        ))}
-                    </Container>
-                )}
-
-                {(itemsByPosition.center.length > 0 || itemsByPosition.centerStart.length > 0 || itemsByPosition.centerEnd.length > 0) && (
-                    <Container
-                        display="flex"
-                        direction={modeClasses.sectionDirection}
-                        gap={gapValue}
-                        align="center"
-                        justify="between"
-                        h="full"
-                        className="navbar-section navbar-section--center flex-1"
-                    >
-                         {/* Center Start Section */}
-                         {itemsByPosition.centerStart.length > 0 && (
-                            <Container
-                                display="flex"
-                                align="center"
-                                justify="start"
-                                h="full"
-                                className="flex-1"
-                            >
-                                {itemsByPosition.centerStart.map((item, index, arr) => (
-                                    <>
+                                    {shouldShowDividerAfter(item, index, arr) && (
                                         <Container
                                             display="flex"
                                             align="center"
-                                            justify={item.type !== 'divider' ? resolveJustify(item.align) : undefined}
-                                            h="full"
-                                            className={`
-                                                navbar-item-wrapper
-                                                ${getMobileVisibilityClass(item)}
-                                            `}
+                                            h={mode === 'horizontal' ? 'full' : undefined}
+                                            w={mode === 'horizontal' ? undefined : 'full'}
                                         >
-                                            {renderNavItem(item, props)}
-                                        </Container>
-                                        {shouldShowDividerAfter(
-                                            item,
-                                            index,
-                                            arr,
-                                        ) && (
-                                            <Container
-                                                display="flex"
-                                                align="center"
-                                                h={mode === 'horizontal' ? 'full' : undefined}
-                                                w={mode === 'horizontal' ? undefined : 'full'}
-                                            >
-                                                {renderDivider(item, mode === 'horizontal' ? 'vertical' : 'horizontal')}
-                                            </Container>
-                                        )}
-                                    </>
-                                ))}
-                            </Container>
-                         )}
-
-                         {/* Center Section */}
-                         {itemsByPosition.center.length > 0 && (
-                            <Container
-                                display="flex"
-                                align="center"
-                                justify="center"
-                                h="full"
-                                className="flex-0"
-                            >
-                                {itemsByPosition.center.map((item, index, arr) => (
-                                    <>
-                                        <Container
-                                            display="flex"
-                                            align="center"
-                                            justify={item.type !== 'divider' ? resolveJustify(item.align) : undefined}
-                                            h="full"
-                                            className={`
-                                                navbar-item-wrapper
-                                                ${getMobileVisibilityClass(item)}
-                                            `}
-                                        >
-                                            {renderNavItem(item, props)}
-                                        </Container>
-                                        {shouldShowDividerAfter(
-                                            item,
-                                            index,
-                                            arr,
-                                        ) && (
-                                            <Container
-                                                display="flex"
-                                                align="center"
-                                                h={mode === 'horizontal' ? 'full' : undefined}
-                                                w={mode === 'horizontal' ? undefined : 'full'}
-                                            >
-                                                {renderDivider(item, mode === 'horizontal' ? 'vertical' : 'horizontal')}
-                                            </Container>
-                                        )}
-                                    </>
-                                ))}
-                            </Container>
-                         )}
-
-                         {/* Center End Section */}
-                         {itemsByPosition.centerEnd.length > 0 && (
-                            <Container
-                                display="flex"
-                                align="center"
-                                justify="end"
-                                h="full"
-                                className="flex-1"
-                            >
-                                {itemsByPosition.centerEnd.map((item, index, arr) => (
-                                    <>
-                                        <Container
-                                            display="flex"
-                                            align="center"
-                                            justify={item.type !== 'divider' ? resolveJustify(item.align) : undefined}
-                                            h="full"
-                                            className={`
-                                                navbar-item-wrapper
-                                                ${getMobileVisibilityClass(item)}
-                                            `}
-                                        >
-                                            {renderNavItem(item, props)}
-                                        </Container>
-                                        {shouldShowDividerAfter(
-                                            item,
-                                            index,
-                                            arr,
-                                        ) && (
-                                            <Container
-                                                display="flex"
-                                                align="center"
-                                                className={mode === 'horizontal' ? 'h-full' : 'w-full'}
-                                            >
-                                                {renderDivider(item, mode === 'horizontal' ? 'vertical' : 'horizontal')}
-                                            </Container>
-                                        )}
-                                    </>
-                                ))}
-                            </Container>
-                         )}
-                    </Container>
-                )}
-
-                {itemsByPosition.end.length > 0 && (
-                    <Container
-                        display="flex"
-                        direction={modeClasses.sectionDirection}
-                        gap={gapValue}
-                        align="center"
-                        h="full"
-                        className="navbar-section navbar-section--end justify-end"
-                    >
-                        {itemsByPosition.end.map((item, index, arr) => (
-                            <>
-                                <Container
-                                    display="flex"
-                                    align="center"
-                                    justify={item.type !== 'divider' ? resolveJustify(item.align) : undefined}
-                                    h="full"
-                                    className={`
-                                        navbar-item-wrapper
-                                        ${getMobileVisibilityClass(item)}
-                                    `}
-                                >
-                                    {renderNavItem(item, props)}
-                                </Container>
-                                {shouldShowDividerAfter(
-                                    item,
-                                    index,
-                                    arr,
-                                ) && (
-                                    <Container
-                                        display="flex"
-                                        align="center"
-                                        className={mode === 'horizontal' ? 'h-full' : 'w-full'}
-                                    >
-                                        {renderDivider(item, mode === 'horizontal' ? 'vertical' : 'horizontal')}
-                                    </Container>
-                                )}
-                            </>
-                        ))}
-
-                        {hasCollapsedItems && (
-                            <Container
-                                display="flex"
-                                align="center"
-                                className="navbar-mobile-toggle ms-4 md:hidden"
-                            >
-                                <input
-                                    id="navbar-mobile-toggle"
-                                    type="checkbox"
-                                    className="peer sr-only"
-                                    aria-label="Toggle navigation menu"
-                                />
-
-                                <label
-                                    htmlFor="navbar-mobile-toggle"
-                                    tabIndex={0}
-                                    role="button"
-                                    aria-expanded="false"
-                                    className="
-                                        flex
-                                        items-center
-                                        size-10
-                                        border-1
-                                        rounded-md
-                                        bg-surface
-                                        items-center
-                                        justify-center
-                                        transition-transform
-                                        duration-200
-                                        ease-out
-                                        hover:bg-brand-subtle
-                                        cursor-pointer
-                                        focus:outline-none
-                                        focus:ring-2
-                                        focus:ring-brand
-                                    "
-                                    onKeyDown={(e: KeyboardEvent) => {
-                                        if (e.key === 'Enter' || e.key === ' ') {
-                                            e.preventDefault();
-                                            (e.target as HTMLLabelElement).click();
-                                        }
-                                    }}
-                                >
-                                    <Icon
-                                        name='bars'
-                                        size="md"
-                                    />
-                                </label>
-
-                                <label
-                                    htmlFor="navbar-mobile-toggle"
-                                    className="
-                                        fixed
-                                        inset-0
-                                        hidden
-                                        md:hidden
-                                        peer-checked:block
-                                        bg-black
-                                        bg-opacity-50
-                                        z-40
-                                    "
-                                    aria-hidden="true"
-                                />
-
-                                <Container
-                                    display="flex"
-                                    direction="column"
-                                    className={`
-                                        navbar-mobile-drawer
-                                        fixed
-                                        inset-y-0
-                                        end-0
-                                        z-50
-                                        w-64
-                                        max-w-full
-                                        bg-surface
-                                        border-s
-                                        border-1
-                                        shadow-lg
-                                        md:hidden
-                                        ${getDrawerTranslateClass()}
-                                        transition-transform
-                                        duration-300
-                                        ease-out
-                                        peer-checked:translate-x-0
-                                    `}
-                                >
-                                    <Container
-                                        display="flex"
-                                        direction="column"
-                                        gap={gapValue}
-                                        className="p-4 flex-1 overflow-y-auto"
-                                    >
-                                        <Container
-                                            display="flex"
-                                            justify="end"
-                                        >
-                                            <label
-                                                htmlFor="navbar-mobile-toggle"
-                                                tabIndex={0}
-                                                role="button"
-                                                aria-label="Close navigation menu"
-                                                className="
-                                                    flex
-                                                    items-center
-                                                    justify-center
-                                                    size-8
-                                                    rounded-md
-                                                    cursor-pointer
-                                                    hover:bg-brand-subtle
-                                                    focus:outline-none
-                                                    focus:ring-2
-                                                    focus:ring-brand
-                                                "
-                                                onKeyDown={(e: KeyboardEvent) => {
-                                                    if (e.key === 'Enter' || e.key === ' ') {
-                                                        e.preventDefault();
-                                                        (e.target as HTMLLabelElement).click();
-                                                    }
-                                                }}
-                                            >
-                                                <Icon
-                                                    name='x'
-                                                    size="md"
-                                                />
-                                            </label>
-                                        </Container>
-
-                                        <Container
-                                            display="flex"
-                                            direction="column"
-                                            gap={gapValue}
-                                            w="full"
-                                        >
-                                            {mobileTopItems.map((item, index, arr) => (
-                                                <>
-                                                    <Container
-                                                        display="flex"
-                                                        align="center"
-                                                        justify="center"
-                                                        w="full"
-                                                        className="navbar-item-wrapper"
-                                                    >
-                                                        {renderNavItem(item, props, true)}
-                                                    </Container>
-                                                    {shouldShowDividerAfter(item, index, arr) && (
-                                                        <Container
-                                                            w="full"
-                                                        >
-                                                            <Divider
-                                                                orientation="horizontal"
-                                                                thickness={props.sidebarDividerThickness || props.dividerThickness || "super-thin"}
-                                                                spacing={props.sidebarDividerSpacing ?? props.dividerSpacing ?? 2}
-                                                                opacity={props.sidebarDividerOpacity ?? props.dividerOpacity ?? 50}
-                                                                variant={props.sidebarDividerVariant || props.dividerVariant}
-                                                                color={props.sidebarDividerColor || props.dividerColor}
-                                                                max={props.sidebarDividerMax ?? props.dividerMax ?? 60}
-                                                            />
-                                                        </Container>
-                                                    )}
-                                                </>
-                                            ))}
-                                        </Container>
-                                    </Container>
-
-                                    {mobileBottomItems.length > 0 && (
-                                        <Container
-                                            display="flex"
-                                            direction={mobileItemsLayout === 'horizontal' ? 'row' : 'column'}
-                                            wrap={mobileItemsLayout === 'horizontal' ? true : undefined}
-                                            gap={gapValue}
-                                            align={mobileItemsLayout === 'horizontal' ? 'center' : undefined}
-                                            justify={mobileItemsLayout === 'horizontal' ? 'center' : undefined}
-                                            w="full"
-                                            className="p-4 border-t border-1"
-                                        >
-                                            {mobileBottomItems.map((item, index, arr) => (
-                                                <>
-                                                    <Container
-                                                        display="flex"
-                                                        align="center"
-                                                        justify="center"
-                                                        w={mobileItemsLayout === 'horizontal' ? undefined : 'full'}
-                                                        className="navbar-item-wrapper"
-                                                    >
-                                                        {renderNavItem(item, props, true)}
-                                                    </Container>
-                                                    {shouldShowDividerAfter(item, index, arr) && (
-                                                        <Container
-                                                            w={mobileItemsLayout === 'horizontal' ? undefined : 'full'}
-                                                            h={mobileItemsLayout === 'horizontal' ? 'full' : undefined}
-                                                            px={mobileItemsLayout === 'horizontal' ? 2 : undefined}
-                                                        >
-                                                            <Divider
-                                                                orientation={mobileItemsLayout === 'horizontal' ? 'vertical' : 'horizontal'}
-                                                                thickness={props.sidebarDividerThickness || props.dividerThickness || "super-thin"}
-                                                                spacing={props.sidebarDividerSpacing ?? props.dividerSpacing ?? 2}
-                                                                opacity={props.sidebarDividerOpacity ?? props.dividerOpacity ?? 50}
-                                                                variant={props.sidebarDividerVariant || props.dividerVariant}
-                                                                color={props.sidebarDividerColor || props.dividerColor}
-                                                                max={props.sidebarDividerMax ?? props.dividerMax ?? 60}
-                                                            />
-                                                        </Container>
-                                                    )}
-                                                </>
-                                            ))}
+                                            {renderDivider(item, props, mode === 'horizontal' ? 'vertical' : 'horizontal')}
                                         </Container>
                                     )}
+                                </>
+                            ))}
+                        </Container>
+                    )}
+
+                    {(itemsByPosition.center.length > 0 || itemsByPosition.centerStart.length > 0 || itemsByPosition.centerEnd.length > 0) && (
+                        <Container
+                            display="flex"
+                            direction={modeClasses.sectionDirection}
+                            gap={gapValue}
+                            align="center"
+                            justify="between"
+                            h="full"
+                            className="navbar-section navbar-section--center flex-1"
+                        >
+                            {itemsByPosition.centerStart.length > 0 && (
+                                <Container
+                                    display="flex"
+                                    align="center"
+                                    justify="start"
+                                    h="full"
+                                    className="flex-1"
+                                >
+                                    {itemsByPosition.centerStart.map((item, index, arr) => (
+                                        <>
+                                            <Container
+                                                display="flex"
+                                                align="center"
+                                                justify={item.type !== 'divider' ? resolveJustify(item.align) : undefined}
+                                                h="full"
+                                                className={`navbar-item-wrapper ${getMobileVisibilityClass(item)}`}
+                                            >
+                                                {renderNavItem(item, props)}
+                                            </Container>
+                                            {shouldShowDividerAfter(item, index, arr) && (
+                                                <Container
+                                                    display="flex"
+                                                    align="center"
+                                                    h={mode === 'horizontal' ? 'full' : undefined}
+                                                    w={mode === 'horizontal' ? undefined : 'full'}
+                                                >
+                                                    {renderDivider(item, props, mode === 'horizontal' ? 'vertical' : 'horizontal')}
+                                                </Container>
+                                            )}
+                                        </>
+                                    ))}
                                 </Container>
-                            </Container>
-                        )}
-                    </Container>
-                )}
-            </Container>
+                            )}
+
+                            {itemsByPosition.center.length > 0 && (
+                                <Container
+                                    display="flex"
+                                    align="center"
+                                    justify="center"
+                                    h="full"
+                                    className="flex-0"
+                                >
+                                    {itemsByPosition.center.map((item, index, arr) => (
+                                        <>
+                                            <Container
+                                                display="flex"
+                                                align="center"
+                                                justify={item.type !== 'divider' ? resolveJustify(item.align) : undefined}
+                                                h="full"
+                                                className={`navbar-item-wrapper ${getMobileVisibilityClass(item)}`}
+                                            >
+                                                {renderNavItem(item, props)}
+                                            </Container>
+                                            {shouldShowDividerAfter(item, index, arr) && (
+                                                <Container
+                                                    display="flex"
+                                                    align="center"
+                                                    h={mode === 'horizontal' ? 'full' : undefined}
+                                                    w={mode === 'horizontal' ? undefined : 'full'}
+                                                >
+                                                    {renderDivider(item, props, mode === 'horizontal' ? 'vertical' : 'horizontal')}
+                                                </Container>
+                                            )}
+                                        </>
+                                    ))}
+                                </Container>
+                            )}
+
+                            {itemsByPosition.centerEnd.length > 0 && (
+                                <Container
+                                    display="flex"
+                                    align="center"
+                                    justify="end"
+                                    h="full"
+                                    className="flex-1"
+                                >
+                                    {itemsByPosition.centerEnd.map((item, index, arr) => (
+                                        <>
+                                            <Container
+                                                display="flex"
+                                                align="center"
+                                                justify={item.type !== 'divider' ? resolveJustify(item.align) : undefined}
+                                                h="full"
+                                                className={`navbar-item-wrapper ${getMobileVisibilityClass(item)}`}
+                                            >
+                                                {renderNavItem(item, props)}
+                                            </Container>
+                                            {shouldShowDividerAfter(item, index, arr) && (
+                                                <Container
+                                                    display="flex"
+                                                    align="center"
+                                                    h={mode === 'horizontal' ? 'full' : undefined}
+                                                    w={mode === 'horizontal' ? undefined : 'full'}
+                                                >
+                                                    {renderDivider(item, props, mode === 'horizontal' ? 'vertical' : 'horizontal')}
+                                                </Container>
+                                            )}
+                                        </>
+                                    ))}
+                                </Container>
+                            )}
+                        </Container>
+                    )}
+
+                    {itemsByPosition.end.length > 0 && (
+                        <Container
+                            display="flex"
+                            direction={modeClasses.sectionDirection}
+                            gap={gapValue}
+                            align="center"
+                            h="full"
+                            className="navbar-section navbar-section--end justify-end"
+                        >
+                            {itemsByPosition.end.map((item, index, arr) => (
+                                <>
+                                    <Container
+                                        display="flex"
+                                        align="center"
+                                        justify={item.type !== 'divider' ? resolveJustify(item.align) : undefined}
+                                        h="full"
+                                        className={`navbar-item-wrapper ${getMobileVisibilityClass(item)}`}
+                                    >
+                                        {renderNavItem(item, props)}
+                                    </Container>
+                                    {shouldShowDividerAfter(item, index, arr) && (
+                                        <Container
+                                            display="flex"
+                                            align="center"
+                                            h={mode === 'horizontal' ? 'full' : undefined}
+                                            w={mode === 'horizontal' ? undefined : 'full'}
+                                        >
+                                            {renderDivider(item, props, mode === 'horizontal' ? 'vertical' : 'horizontal')}
+                                        </Container>
+                                    )}
+                                </>
+                            ))}
+
+                            {hasSidemenu && props.sidemenu!.showToggle !== false && (
+                                <Container
+                                    display="flex"
+                                    align="center"
+                                    className={`navbar-sidemenu-toggle ms-4 md:hidden ${props.sidemenu!.toggleClassName || ''}`}
+                                >
+                                    <label
+                                        htmlFor={props.sidemenu!.id}
+                                        tabIndex={0}
+                                        role="button"
+                                        aria-label="Toggle sidemenu"
+                                        className="
+                                            flex
+                                            items-center
+                                            justify-center
+                                            size-10
+                                            border-1
+                                            rounded-md
+                                            bg-surface
+                                            transition-transform
+                                            duration-200
+                                            ease-out
+                                            hover:bg-brand-subtle
+                                            cursor-pointer
+                                            focus:outline-none
+                                            focus:ring-2
+                                            focus:ring-brand
+                                        "
+                                        onKeyDown={(e: KeyboardEvent) => {
+                                            if (e.key === 'Enter' || e.key === ' ') {
+                                                e.preventDefault();
+                                                (e.target as HTMLLabelElement).click();
+                                            }
+                                        }}
+                                    >
+                                        <Icon
+                                            name={(props.sidemenu!.toggleIcon || 'bars') as IconName}
+                                            size="md"
+                                        />
+                                    </label>
+                                </Container>
+                            )}
+                        </Container>
+                    )}
+                </Container>
+
+                {hasSidemenu && <Sidemenu {...props.sidemenu!} />}
+            </>
         );
     }
 

@@ -8,5 +8,6 @@
 
     export * from './types';
     export * from './kit/navbar';
+    export * from './kit/sidemenu';
 
 // ╚══════════════════════════════════════════════════════════════════════════════════════╝
