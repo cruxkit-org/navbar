@@ -8,7 +8,7 @@
 </div>
 
 <div align="center">
-    <img src="https://img.shields.io/badge/v-0.0.9-black"/>
+    <img src="https://img.shields.io/badge/v-0.1.0-black"/>
     <a href="https://github.com/cruxkit-org"><img src="https://img.shields.io/badge/🔥-@cruxkit-black"/></a>
     <br>
     <img src="https://img.shields.io/badge/coverage-94.35%25-brightgreen" alt="Test Coverage" />
@@ -117,7 +117,9 @@
                         styleMode='classic'
                         autoDivider={true}
                         labelArrow
-                        onSelect={v => { setLang(v as string); window.location.reload();
+                        onSelect={v => {
+                                setLang(v as string);
+                                reload();
                                 toast.info(t("toast.lang_toggled")!);
                             }}
                     />
@@ -138,8 +140,8 @@
 
                 {/* Sidemenu Footer */}
                 <Container p={4} className="border-t border-1">
-                    <Button variant="solid" color="brand" className="w-full" leftIcon={{name: 'github'}} href="https://github.com/maysara-elshewehy"
-                    onClick={() => window.open('https://github.com/maysara-elshewehy', '_blank')}>
+                    <Button variant="solid" color="brand" className="w-full" leftIcon={{name: 'github'}}
+                    onClick={() => visit('https://github.com/maysara-elshewehy')}>
                         {t("common.follow_me")!}
                     </Button>
                 </Container>
@@ -213,7 +215,7 @@
                         labelArrow
                         onSelect={
                             v => {
-                            setLang(v as string); window.location.reload();
+                            setLang(v as string); reload();
                             toast.info(t("toast.lang_toggled")!);
                         }}
                     />
