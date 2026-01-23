@@ -56,15 +56,15 @@
         ```tsx
         let isDark: undefined | Signal<boolean> = undefined;
 
-        // ─────────────────────────────── SIDEBAR CONTENT ─────────────────────────────
+        // ─────────────────────────────── SIDEMENU CONTENT ─────────────────────────────
 
-        const SidebarContent = (): JSXElement => (
+        const SidemenuContent = (): JSXElement => (
             <Container display="flex" direction="column" h="full">
                 <Container p={4} className="border-b border-1">
                     <Container display="flex" justify="between" align="center">
                         <h2 className="text-lg font-semibold">Menu</h2>
                         <label
-                            htmlFor="app-sidebar"
+                            htmlFor="app-sidemenu"
                             className="
                                 flex
                                 items-center
@@ -79,7 +79,7 @@
                             "
                             tabIndex={0}
                             role="button"
-                            aria-label="Close sidebar"
+                            aria-label="Close sidemenu"
                             onKeyDown={(e: KeyboardEvent) => {
                                 if (e.key === 'Enter' || e.key === ' ') {
                                     e.preventDefault();
@@ -92,7 +92,7 @@
                     </Container>
                 </Container>
 
-                {/* Sidebar Body */}
+                {/* Sidemenu Body */}
                 <Container display="flex" direction="column" gap={2} p={4} className="flex-1 overflow-y-auto">
                     <Button variant="ghost" color="neutral" className="justify-between w-full" rightIcon={{name: 'home'}}>
                         {t("common.home")!}
@@ -136,7 +136,7 @@
                     </Button>
                 </Container>
 
-                {/* Sidebar Footer */}
+                {/* Sidemenu Footer */}
                 <Container p={4} className="border-t border-1">
                     <Button variant="solid" color="brand" className="w-full" leftIcon={{name: 'github'}} href="https://github.com/maysara-elshewehy"
                     onClick={() => window.open('https://github.com/maysara-elshewehy', '_blank')}>
@@ -303,10 +303,10 @@
             dividerOpacity: 50,
             dividerSpacing: 0,
 
-            // Sidebar Integration
-            sidebar: {
-                id: 'app-sidebar',
-                component: SidebarContent,
+            // Sidemenu Integration
+            sidemenu: {
+                id: 'app-sidemenu',
+                component: SidemenuContent,
                 position: 'end',
                 width: 'md',
                 backdrop: true,
@@ -386,7 +386,7 @@
             export type NavConfigMap = Partial<Record<NavItemType, NavTypeConfig>>;
 
 
-            // ─────────────────────────────── SIDEBAR TYPES ───────────────────────────────
+            // ─────────────────────────────── SIDEMENU TYPES ───────────────────────────────
 
             export type SidemenuPosition     = 'start' | 'end';
             export type SidemenuWidth        = 'sm' | 'md' | 'lg' | 'xl' | 'full' | string | number;

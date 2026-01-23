@@ -55,7 +55,7 @@
     export type NavConfigMap = Partial<Record<NavItemType, NavTypeConfig>>;
 
 
-    // ─────────────────────────────── SIDEBAR TYPES ───────────────────────────────
+    // ─────────────────────────────── SIDEMENU TYPES ───────────────────────────────
 
     export type SidemenuPosition     = 'start' | 'end';
     export type SidemenuWidth        = 'sm' | 'md' | 'lg' | 'xl' | 'full' | string | number;
