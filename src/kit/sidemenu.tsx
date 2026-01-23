@@ -9,6 +9,7 @@
     import type { JSXElement } from '@minejs/jsx';
     import { Container } from '@cruxkit/container';
     import type { SidemenuConfig } from '../types';
+import { Overlay } from '@cruxkit/overlay';
 
 // ╚══════════════════════════════════════════════════════════════════════════════════════╝
 
@@ -72,7 +73,7 @@
      * @returns A complete sidemenu component with optional backdrop, keyboard, and click-outside behaviors.
      */
     export function Sidemenu(props: SidemenuProps): JSXElement {
-        const position = props.position || 'end';
+        const position = props.position || 'start';
         const width = resolveWidth(props.width);
         const backdrop = props.backdrop ?? true;
         const closeOnBackdrop = props.closeOnBackdrop ?? true;
@@ -102,19 +103,17 @@
 
                 {/* Backdrop */}
                 {backdrop && (
-                    <label
+                    <Overlay
                         htmlFor={closeOnBackdrop ? props.id : undefined}
+                        backdrop={true}
+                        zIndex={zIndex - 1}
                         className={`
                             fixed
-                            inset-0
-                            bg-black
-                            bg-opacity-50
                             hidden
                             peer-checked:block
                             transition-opacity
                             ${durationClass}
                         `}
-                        style={{ zIndex: zIndex - 1 }}
                         aria-hidden="true"
                         onClick={closeOnBackdrop ? undefined : (e: MouseEvent) => e.preventDefault()}
                     />

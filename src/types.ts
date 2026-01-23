@@ -83,6 +83,7 @@
         // Toggle button customization
         toggleIcon?                 : string;
         toggleClassName?            : string;
+        toggleMargin?               : boolean;
         showToggle?                 : boolean;
         alwaysShowToggle?           : boolean;
     }

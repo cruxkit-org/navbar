@@ -10,7 +10,7 @@
     import { Container, type ContainerGap, type ContainerJustify } from '@cruxkit/container';
     import { Icon, IconName } from '@cruxkit/icon';
     import { Divider } from '@cruxkit/divider';
-    import type { NavProps, NavItem, NavSpacing, NavItemAlign } from '../types';
+    import type { NavProps, NavItem, NavSpacing, NavItemAlign, SidemenuConfig } from '../types';
     import { Sidemenu } from './sidemenu';
     import { push } from '@cruxjs/client';
 
@@ -60,8 +60,9 @@
                 <Container
                     display="flex"
                     align="center"
+                    justify='center'
                     gap={gap ?? 2}
-                    className="navbar-item navbar-logo cursor-pointer"
+                    className="navbar-item navbar-logo cursor-pointer size-10 cursor-pointer active:scale-95"
                     onClick={() => push('/')}
                 >
                     {resolveContent(item.content)}
@@ -85,13 +86,17 @@
         }
 
         if (item.type === 'actions') {
+            const useResponsiveGap = gap === undefined;
+            const gapValue = useResponsiveGap ? undefined : gap;
+            const gapClass = useResponsiveGap ? 'gap-1 md:gap-2' : '';
+
             return (
                 <Container
                     display="flex"
                     align="center"
-                    gap={gap ?? 2}
+                    gap={gapValue}
                     h="full"
-                    className="navbar-item navbar-actions"
+                    className={`navbar-item navbar-actions ${gapClass}`}
                 >
                     {resolveContent(item.content)}
                 </Container>
@@ -255,6 +260,58 @@
         return null;
     }
 
+    function renderSidemenuToggle(sidemenu: SidemenuConfig): JSXElement | null {
+        if (sidemenu.showToggle === false) return null;
+
+        const position = sidemenu.position || 'start';
+        const marginClass = position === 'start'
+            ? (sidemenu.toggleMargin !== false ? 'me-4' : '')
+            : (sidemenu.toggleMargin !== false ? 'ms-4' : '');
+
+        return (
+            <Container
+                display="flex"
+                align="center"
+                className={`navbar-sidemenu-toggle ${marginClass} ${sidemenu.alwaysShowToggle ? '' : 'md:hidden'} ${sidemenu.toggleClassName || ''}`}
+            >
+                <label
+                    htmlFor={sidemenu.id}
+                    tabIndex={0}
+                    role="button"
+                    aria-label="Toggle sidemenu"
+                    className="
+                        flex
+                        items-center
+                        justify-center
+                        size-10
+                        border-1
+                        rounded-md
+                        bg-surface
+                        transition-transform
+                        duration-200
+                        ease-out
+                        hover:bg-brand-subtle
+                        cursor-pointer
+                        focus:outline-none
+                        focus:ring-2
+                        focus:ring-brand
+                    "
+                    onKeyDown={(e: KeyboardEvent) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            (e.target as HTMLLabelElement).click();
+                        }
+                    }}
+                >
+                    <Icon
+                        name={(sidemenu.toggleIcon || 'bars') as IconName}
+                        size="md"
+                    />
+                </label>
+            </Container>
+        );
+    }
+
     /**
      * Renders a responsive navigation bar with configurable sections and items.
      *
@@ -278,6 +335,12 @@
         const mode = props.mode || 'horizontal';
         const gap = props.gap || 'md';
         const hasSidemenu = !!props.sidemenu;
+        const sidemenuPosition = props.sidemenu?.position || 'start';
+
+        // Responsive gap handling for default 'md' size
+        const useResponsiveGap = gap === 'md';
+        const gapValue = useResponsiveGap ? undefined : resolveNavGap(gap);
+        const gapClass = useResponsiveGap ? 'gap-1 md:gap-2' : '';
 
         const itemsWithPosition = props.items.map(item => {
             const position = item.position
@@ -294,7 +357,9 @@
             end         : itemsWithPosition.filter(e => e.position === 'end').map(e => e.item)
         };
 
-        const gapValue = resolveNavGap(gap);
+        const hasCenter = itemsByPosition.center.length > 0
+            || itemsByPosition.centerStart.length > 0
+            || itemsByPosition.centerEnd.length > 0;
 
         const modeClasses =
             mode === 'vertical'
@@ -322,19 +387,21 @@
                         ${mode === 'horizontal' ? 'border-b' : 'border-e'}
                         border-1
                         ${stickyClass}
+                        ${gapClass}
                         ${props.className || ''}
                     `}
                 >
-                    {itemsByPosition.start.length > 0 && (
+                    {(itemsByPosition.start.length > 0 || (hasSidemenu && sidemenuPosition === 'start')) && (
                         <Container
                             display="flex"
                             direction={modeClasses.sectionDirection}
                             gap={gapValue}
                             align="center"
                             h="full"
-                            className="navbar-section navbar-section--start"
+                            className={`navbar-section navbar-section--start ${gapClass}`}
                         >
-                            {itemsByPosition.start.map((item, index, arr) => (
+                            <>{hasSidemenu && sidemenuPosition === 'start' && renderSidemenuToggle(props.sidemenu!)}</>
+                            <>{itemsByPosition.start.map((item, index, arr) => (
                                 <>
                                     <Container
                                         display="flex"
@@ -359,11 +426,11 @@
                                         </Container>
                                     )}
                                 </>
-                            ))}
+                            ))}</>
                         </Container>
                     )}
 
-                    {(itemsByPosition.center.length > 0 || itemsByPosition.centerStart.length > 0 || itemsByPosition.centerEnd.length > 0) && (
+                    {hasCenter && (
                         <Container
                             display="flex"
                             direction={modeClasses.sectionDirection}
@@ -371,7 +438,7 @@
                             align="center"
                             justify="between"
                             h="full"
-                            className="navbar-section navbar-section--center flex-1"
+                            className={`navbar-section navbar-section--center flex-1 ${gapClass}`}
                         >
                             {itemsByPosition.centerStart.length > 0 && (
                                 <Container
@@ -477,16 +544,16 @@
                         </Container>
                     )}
 
-                    {itemsByPosition.end.length > 0 && (
+                    {(itemsByPosition.end.length > 0 || (hasSidemenu && sidemenuPosition === 'end')) && (
                         <Container
                             display="flex"
                             direction={modeClasses.sectionDirection}
                             gap={gapValue}
                             align="center"
                             h="full"
-                            className="navbar-section navbar-section--end justify-end"
+                            className={`navbar-section navbar-section--end justify-end ${!hasCenter ? (mode === 'vertical' ? 'mt-auto' : 'ms-auto') : ''} ${gapClass}`}
                         >
-                            {itemsByPosition.end.map((item, index, arr) => (
+                            <>{itemsByPosition.end.map((item, index, arr) => (
                                 <>
                                     <Container
                                         display="flex"
@@ -508,50 +575,9 @@
                                         </Container>
                                     )}
                                 </>
-                            ))}
+                            ))}</>
 
-                            {hasSidemenu && props.sidemenu!.showToggle !== false && (
-                                <Container
-                                    display="flex"
-                                    align="center"
-                                    className={`navbar-sidemenu-toggle ms-4 ${props.sidemenu!.alwaysShowToggle ? '' : 'md:hidden'} ${props.sidemenu!.toggleClassName || ''}`}
-                                >
-                                    <label
-                                        htmlFor={props.sidemenu!.id}
-                                        tabIndex={0}
-                                        role="button"
-                                        aria-label="Toggle sidemenu"
-                                        className="
-                                            flex
-                                            items-center
-                                            justify-center
-                                            size-10
-                                            border-1
-                                            rounded-md
-                                            bg-surface
-                                            transition-transform
-                                            duration-200
-                                            ease-out
-                                            hover:bg-brand-subtle
-                                            cursor-pointer
-                                            focus:outline-none
-                                            focus:ring-2
-                                            focus:ring-brand
-                                        "
-                                        onKeyDown={(e: KeyboardEvent) => {
-                                            if (e.key === 'Enter' || e.key === ' ') {
-                                                e.preventDefault();
-                                                (e.target as HTMLLabelElement).click();
-                                            }
-                                        }}
-                                    >
-                                        <Icon
-                                            name={(props.sidemenu!.toggleIcon || 'bars') as IconName}
-                                            size="md"
-                                        />
-                                    </label>
-                                </Container>
-                            )}
+                            <>{hasSidemenu && sidemenuPosition === 'end' && renderSidemenuToggle(props.sidemenu!)}</>
                         </Container>
                     )}
                 </Container>

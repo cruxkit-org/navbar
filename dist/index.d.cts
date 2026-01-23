@@ -40,6 +40,7 @@ interface SidemenuConfig {
     zIndex?: 0 | 10 | 20 | 30 | 40 | 50 | 60 | 70 | 80 | 90 | 100;
     toggleIcon?: string;
     toggleClassName?: string;
+    toggleMargin?: boolean;
     showToggle?: boolean;
     alwaysShowToggle?: boolean;
 }
