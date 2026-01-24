@@ -1,7 +1,7 @@
 {
 	"name"                             : "@cruxkit/navbar",
 	"version"                          : "0.1.5",
-	"description"                      : "Tiny, composable navbar engine for CruxJS ad MineJS. Arrange responsive nav sections with simple, typed config only.",
+	"description"                      : "A lightweight, reactive navbar and sidemenu solution, built for @cruxjs ecosystem.",
 	"keywords"                         : ["crux", "kit", "navbar"],
 	"license"                          : "MIT",
 	"homepage"                         : "https://github.com/cruxkit-org/navbar#readme",

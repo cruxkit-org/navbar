@@ -25,7 +25,7 @@
 
 - ## Overview 👀
     - #### Why ?
-        > To compose navbars from small layout primitives instead of hand‑rolled flex code.
+        > A lightweight, reactive navbar and sidemenu solution, built for [`@cruxjs`](https://github.com/cruxjs-org) ecosystem.
 
     - #### When ?
         > When you need a layout for logo, links, search and actions that stays consistent across pages.
@@ -404,8 +404,6 @@
         - #### Types
 
             ```tsx
-            // ─────────────────────────────── NAVBAR TYPES ────────────────────────────────
-
             export type NavItemPosition     = 'start' | 'center' | 'center-start' | 'center-end' | 'end';
             export type NavItemAlign        = 'flex-start' | 'center' | 'flex-end';
             export type NavLayoutMode       = 'horizontal' | 'vertical';
@@ -442,10 +440,9 @@
             }
 
             export type NavConfigMap = Partial<Record<NavItemType, NavTypeConfig>>;
+            ```
 
-
-            // ─────────────────────────────── SIDEMENU TYPES ───────────────────────────────
-
+            ```typescript
             export type SidemenuPosition     = 'start' | 'end';
             export type SidemenuWidth        = 'sm' | 'md' | 'lg' | 'xl' | 'full' | string | number;
 
@@ -455,16 +452,16 @@
                 component                   : JSXElement | (() => JSXElement);
                 position?                   : SidemenuPosition;
                 width?                      : SidemenuWidth;
-                
+
                 // Behavior
                 backdrop?                   : boolean;
                 closeOnBackdrop?            : boolean;
                 closeOnEscape?              : boolean;
-                
+
                 // Animation
                 transition?                 : 'slide' | 'fade' | 'none';
                 duration?                   : number;
-                
+
                 // Styling
                 className?                  : string;
                 zIndex?                     : 0 | 10 | 20 | 30 | 40 | 50 | 60 | 70 | 80 | 90 | 100;
@@ -474,26 +471,25 @@
                 toggleClassName?            : string;
                 showToggle?                 : boolean;
             }
+            ```
 
-
-            // ─────────────────────────────── NAVBAR PROPS ────────────────────────────────
-
+            ```typescript
             export interface NavProps {
                 // Items
                 items                       : NavItem[];
-                
+
                 // Layout
                 mode?                       : NavLayoutMode;
                 gap?                        : NavSpacing;
                 sticky?                     : boolean;
                 config?                     : NavConfigMap;
-                
+
                 // Sidemenu Integration
                 sidemenu?                    : SidemenuConfig;
-                
+
                 // Styling
                 className?                  : string;
-                
+
                 // Divider customization (main navbar)
                 dividerVariant?             : 'solid' | 'dashed' | 'dotted';
                 dividerThickness?           : 'super-thin' | 'thin' | 'medium' | 'thick';
