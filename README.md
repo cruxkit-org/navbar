@@ -51,111 +51,34 @@
     <br>
 
 
-    - ### Basic usage
+    - ### Usage
+
+        > a complete real example
 
         ```tsx
+        import { render, type JSXElement }                          from '@minejs/jsx';
+        import { toggleTheme, getCurrentTheme }                     from '@cruxext/theme';
+        import { setLang, t, visit, reload }                        from '@cruxjs/client';
+        import { Navbar as NavbarKit, type NavItem, type NavProps } from '@cruxkit/navbar';
+        import { Button }                                           from '@cruxkit/button';
+        import { Dropdown }                                         from '@cruxkit/dropdown';
+        import { Container }                                        from '@cruxkit/container';
+        import { effect, Signal, signal }                           from '@minejs/signals';
+        import { Icon }                                             from '@cruxkit/icon';
+        import { toast }                                            from '@cruxext/toast';
+        import { Text }                                             from '@cruxkit/text';
+        import { Divider }                                          from '@cruxkit/divider';
+
         let isDark: undefined | Signal<boolean> = undefined;
+        ```
 
-        // ─────────────────────────────── SIDEMENU CONTENT ─────────────────────────────
-
-        const SidemenuContent = (): JSXElement => (
-            <Container display="flex" direction="column" h="full">
-                <Container p={4} className="border-b border-1">
-                    <Container display="flex" justify="between" align="center">
-                        <h2 className="text-lg font-semibold">Menu</h2>
-                        <label
-                            htmlFor="app-sidemenu"
-                            className="
-                                flex
-                                items-center
-                                justify-center
-                                size-8
-                                rounded-md
-                                cursor-pointer
-                                hover:bg-brand-subtle
-                                focus:outline-none
-                                focus:ring-2
-                                focus:ring-brand
-                            "
-                            tabIndex={0}
-                            role="button"
-                            aria-label="Close sidemenu"
-                            onKeyDown={(e: KeyboardEvent) => {
-                                if (e.key === 'Enter' || e.key === ' ') {
-                                    e.preventDefault();
-                                    (e.target as HTMLLabelElement).click();
-                                }
-                            }}
-                        >
-                            <Icon name="x" size="md" />
-                        </label>
-                    </Container>
-                </Container>
-
-                {/* Sidemenu Body */}
-                <Container display="flex" direction="column" gap={2} p={4} className="flex-1 overflow-y-auto">
-                    <Button variant="ghost" color="neutral" className="justify-between w-full" rightIcon={{name: 'home'}}>
-                        {t("common.home")!}
-                    </Button>
-                    
-                    <Button variant="ghost" color="neutral" className="justify-between w-full" rightIcon={{name: 'book-open'}}>
-                        {t("common.docs")!}
-                    </Button>
-
-                    <Container className="border-t border-1 my-2" />
-
-                    <Dropdown
-                        variant="ghost" 
-                        color="neutral" className="justify-between w-full" 
-                        trigger={t("common.lang")!}
-                        triggerIcon={'language'}
-                        triggerDisplay="icon-label"
-                        options={[
-                            { label: 'العربية', value: 'ar' },
-                            { label: 'English', value: 'en' }
-                        ]}
-                        styleMode='classic'
-                        autoDivider={true}
-                        labelArrow
-                        onSelect={v => {
-                                setLang(v as string);
-                                reload();
-                                toast.info(t("toast.lang_toggled")!);
-                            }}
-                    />
-
-                    <Button
-                        variant="ghost"
-                        color="neutral"
-                        className="justify-between w-full"
-                        onClick={() => {
-                            toggleTheme();
-                            toast.info(t("toast.theme_toggled")!);
-                        }}
-                        rightIcon={{name: getCurrentTheme() === 'light' ? 'sun' : 'moon'}}
-                    >
-                        {t("common.theme")!}
-                    </Button>
-                </Container>
-
-                {/* Sidemenu Footer */}
-                <Container p={4} className="border-t border-1">
-                    <Button variant="solid" color="brand" className="w-full" leftIcon={{name: 'github'}}
-                    onClick={() => visit('https://github.com/maysara-elshewehy')}>
-                        {t("common.follow_me")!}
-                    </Button>
-                </Container>
-            </Container>
-        );
-
-        // ─────────────────────────────── NAVBAR ITEMS ────────────────────────────────
-
+        ```tsx
         const items: NavItem[] = [
             // Logo
             {
                 type: 'logo',
                 position: 'start',
-                divider: false,
+                divider: true,
                 content: (
                     <img
                         src="/static/dist/img/logo.svg"
@@ -168,7 +91,7 @@
             // Links
             {
                 type: 'links',
-                position: 'center',
+                position: 'center-start',
                 divider: true,
                 dividerMainOnMobile: 'hidden',
                 content: () => (
@@ -179,11 +102,11 @@
             },
             {
                 type: 'links',
-                position: 'center',
+                position: 'center-start',
                 content: () => (
                     <Dropdown
                         trigger={t("common.docs")!}
-                        triggerDisplay="label-icon"
+                        triggerDisplay="label-only"
                         options={[
                             { label: 'Core', value: 'core' },
                             { label: 'Text', value: 'text' }
@@ -215,8 +138,9 @@
                         labelArrow
                         onSelect={
                             v => {
-                            setLang(v as string); reload();
-                            toast.info(t("toast.lang_toggled")!);
+                            setLang(v as string, true, false, true);
+                            reload();
+                            toast().info(t("toast.lang_toggled")!);
                         }}
                     />
                 )
@@ -224,8 +148,6 @@
             {
                 type: 'actions',
                 position: 'end',
-                divider: true,
-                dividerMainOnMobile: 'hidden',
                 content: () => (
                     <Button
                         id="theme_button"
@@ -242,7 +164,7 @@
                                 console.log('onEffect');
                                 if (typeof document === 'undefined') return;
                                 const svg = isDark && isDark() ? Icon('sun')! : Icon('moon')!;
-                                
+
                                 render(svg, '#theme_button span > svg')
                                 const btn = document.querySelector('#theme_button span > svg')
                                 if(btn) render(svg, btn as HTMLElement)
@@ -257,28 +179,17 @@
                             isDark.set(next);
 
                             toggleTheme();
-                            toast.info(t("toast.theme_toggled")!);
+                            toast().info(t("toast.theme_toggled")!);
                         }}
                     >
                         <Icon name={getCurrentTheme() == 'light' ? 'sun' : 'moon'}></Icon>
                     </Button>
                 )
             },
-            {
-                type: 'actions',
-                position: 'end',
-                keepOnMobile: true,
-                dividerMainOnMobile: 'hidden',
-                content: () => (
-                    <Button variant='ghost' color="brand">
-                        <Icon name='dungeon'></Icon>
-                    </Button>
-                )
-            },
         ];
+        ```
 
-        // ─────────────────────────────── NAVBAR CONFIG ───────────────────────────────
-
+        ```tsx
         const navProps: NavProps = {
             mode: 'horizontal',
             gap: 'md',
@@ -298,10 +209,10 @@
                     gap: 'sm',
                 },
             },
-            
+
             className: 'px-4 h-12',
 
-            dividerMax: 50,
+            dividerMax: 30,
             dividerOpacity: 50,
             dividerSpacing: 0,
 
@@ -309,7 +220,7 @@
             sidemenu: {
                 id: 'app-sidemenu',
                 component: SidemenuContent,
-                position: 'end',
+                position: 'start',
                 width: 'md',
                 backdrop: true,
                 closeOnBackdrop: true,
@@ -319,9 +230,154 @@
                 zIndex: 50,
                 showToggle: true,
                 toggleIcon: 'bars',
+                toggleMargin: false,
+                alwaysShowToggle: true,
             }
         };
+        ```
 
+        ```tsx
+        const SidemenuContent = (): JSXElement => (
+            <Container display="flex" direction="column" h="full">
+                <Container px={4} className="h-12 border-b border-1" h={'full'}>
+                    <Container display="flex" justify="between" align="center" h={'full'}>
+                        <Container display="flex" justify="between" align="center" h={'full'} gap={4}>
+                            <label
+                                htmlFor="app-sidemenu"
+                                className="
+                                    flex
+                                    items-center
+                                    justify-center
+                                    size-8
+                                    rounded-md
+                                    cursor-pointer
+                                    hover:bg-brand-subtle
+                                    focus:outline-none
+                                    focus:ring-2
+                                    focus:ring-brand
+                                "
+                                tabIndex={0}
+                                role="button"
+                                aria-label="Close sidemenu"
+                                onKeyDown={(e: KeyboardEvent) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                        e.preventDefault();
+                                        (e.target as HTMLLabelElement).click();
+                                    }
+                                }}
+                            >
+                                <Icon name="bars" size="md" />
+                            </label>
+                            <img
+                                src="/static/dist/img/logo.svg"
+                                alt="logo"
+                                className="h-6 w-auto object-contain"
+                            />
+                            <Divider max={30} orientation='vertical' thickness='super-thin' className='my-auto' />
+                            <Text size='lg' weight='bold'>{t("app.name")!}</Text>
+                        </Container>
+                        <label
+                            htmlFor="app-sidemenu"
+                            className="
+                                flex
+                                items-center
+                                justify-center
+                                size-8
+                                rounded-md
+                                cursor-pointer
+                                hover:bg-brand-subtle
+                                focus:outline-none
+                                focus:ring-2
+                                focus:ring-brand
+                            "
+                            tabIndex={0}
+                            role="button"
+                            aria-label="Close sidemenu"
+                            onKeyDown={(e: KeyboardEvent) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    (e.target as HTMLLabelElement).click();
+                                }
+                            }}
+                        >
+                            <Icon name="x" size="sm" />
+                        </label>
+                    </Container>
+                </Container>
+
+                {/* Sidemenu Body */}
+                <Container display="flex" direction="column" gap={2} p={4} className="flex-1 overflow-y-auto">
+                    <Button variant="outline" color="neutral" className="justify-start w-full gap-4" leftIcon={{name: 'home', size: 'sm', class: 'opacity-50'}}>
+                        {t("common.home")!}
+                    </Button>
+
+                    <Dropdown
+                        variant='outline'
+                        color="neutral"
+                        className="justify-start w-full"
+                        gap={4}
+                        trigger={t("common.docs")!}
+                        triggerIcon={{name: 'book-open', size: 'sm', class: 'opacity-50'}}
+                        triggerDisplay="label-icon"
+                        options={[
+                            { label: 'Core', value: 'core' },
+                            { label: 'Text', value: 'text' }
+                        ]}
+                        styleMode='classic'
+                        autoDivider={true}
+                        labelArrow
+                    />
+
+                    <Divider max={30} orientation='horizontal' thickness='super-thin' className='mx-auto my-2' />
+
+                    <Dropdown
+                        variant='outline'
+                        color="neutral"
+                        className="justify-start w-full"
+                        gap={4}
+                        trigger={t("common.lang")!}
+                        triggerIcon={{name: 'language', size: 'sm', class: 'opacity-50'}}
+                        triggerDisplay="label-icon"
+                        options={[
+                            { label: 'العربية', value: 'ar' },
+                            { label: 'English', value: 'en' }
+                        ]}
+                        styleMode='classic'
+                        autoDivider={true}
+                        labelArrow
+                        onSelect={v => {
+                                setLang(v as string, true, false, true);
+                                reload();
+                                toast().info(t("toast.lang_toggled")!);
+                            }}
+                    />
+
+                    <Button
+                        variant="outline"
+                        color="neutral"
+                        className="justify-start w-full gap-4"
+                        onClick={() => {
+                            toggleTheme();
+                            toast().info(t("toast.theme_toggled")!);
+                        }}
+                        leftIcon={{name: getCurrentTheme() === 'light' ? 'sun' : 'moon', size: 'sm', class: 'opacity-50'}}
+                    >
+                        {t("common.theme")!}
+                    </Button>
+                </Container>
+
+                {/* Sidemenu Footer */}
+                <Container p={4} className="border-t border-1">
+                    <Button variant="solid" color="brand" className="w-full bg-brand-gt" rightIcon={{name: 'github', color: getCurrentTheme() == 'dark' ? '#fff' : '#000', class: 'opacity-50'}}
+                    onClick={() => visit('https://github.com/maysara-elshewehy', true)}>
+                        {t("common.follow_me")!}
+                    </Button>
+                </Container>
+            </Container>
+        );
+        ```
+
+        ```tsx
         export const Navbar = (): JSXElement => {
             return NavbarKit(navProps);
         };
